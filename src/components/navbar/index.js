@@ -1,12 +1,12 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 export default function Navbar() {
   return (
-    <div >
-      <nav class="banner wrapper sty align-center">
-        <a href="login.html">LOGIN</a> |
-        <a href="about.html">ABOUT</a> |
-      </nav>
-    </div>
+    <nav class="banner wrapper sty align-center">
+      <NavLink to="/">LOGIN |</NavLink>
+      <NavLink to="/about"> ABOUT |</NavLink>
+    </nav>
+
   );
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import loginhero from "../../images/hololens.jpg";
 
 export const LoginScreen = () => {
 
@@ -6,11 +7,6 @@ export const LoginScreen = () => {
     <div>
       {/* Wrapper */}
       <div id="wrapper" class="divided">
-
-        <nav class="banner wrapper sty align-center">
-          <a href="login.html">LOGIN</a> |
-          <a href="about.html">ABOUT</a> |
-        </nav>
 
         {/* One */}
         <section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
@@ -39,17 +35,9 @@ export const LoginScreen = () => {
 
 
           <div class="image">
-            <img src="images/hololens.jpg" alt="" />
+            <img src={loginhero} alt="" />
           </div>
         </section>
-
-        {/* Footer */}
-        <footer class="wrapper style1 align-center">
-          <div class="inner">
-            <p>&copy; 2021 <a href="about.html">Aurolab Image</a></p>
-          </div>
-        </footer>
-
       </div>
     </div>
   );

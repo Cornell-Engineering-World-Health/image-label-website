@@ -9,7 +9,7 @@ import { LoginScreen } from "../screens/loginScreen";
 import { SignUpScreen } from "../screens/signUpScreen";
 import { PipelineScreen } from "../screens/pipelineScreen";
 import { RelabelScreen } from "../screens/relabelScreen";
-import { NavBar } from "../components/navbar";
+import NavBar from "../components/navbar";
 import Footer from "../components/footer";
 import "../App.js";
 import "./routes.css";
@@ -19,18 +19,18 @@ function Routes(props) {
     <div className="page-container">
       <div className="content-wrap">
         <Router>
-          {/* <nav>
+          <nav>
             <NavBar></NavBar>
-          </nav> */}
+          </nav>
           <Switch>
             <Route exact path={"/"} component={LoginScreen} />
-            <Route exact path={"/signup"} component={SignUpScreen} />
-            <Route exact path={"/about"} component={AboutScreen} />
-            <Route exact path={"/console"} component={ConsoleScreen} />
-            <Route exact path={"/dashboard"} component={DashboardScreen} />
-            <Route exact path={"/imagemap"} component={ImageMapScreen} />
-            <Route exact path={"/pipeline"} component={PipelineScreen} />
-            <Route exact path={"/relabel"} component={RelabelScreen} />
+            <Route path={"/signup"} component={SignUpScreen} />
+            <Route path={"/about"} component={AboutScreen} />
+            <Route path={"/console"} component={ConsoleScreen} />
+            <Route path={"/dashboard"} component={DashboardScreen} />
+            <Route path={"/imagemap"} component={ImageMapScreen} />
+            <Route path={"/pipeline"} component={PipelineScreen} />
+            <Route path={"/relabel"} component={RelabelScreen} />
           </Switch>
         </Router>
       </div>
