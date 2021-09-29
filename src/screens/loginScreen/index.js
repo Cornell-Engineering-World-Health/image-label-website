@@ -1,5 +1,6 @@
 import React from "react";
 import loginhero from "../../images/hololens.jpg";
+// import { firebase } from "../../firebase/firebase";
 
 export const LoginScreen = () => {
 
@@ -26,7 +27,7 @@ export const LoginScreen = () => {
                 </div>
 
               </div>
-              <ul class="actions special">
+              <ul class="actions special" >
                 <li><input type="submit" name="submit" id="submit" value="Login" /></li>
               </ul>
             </form>
