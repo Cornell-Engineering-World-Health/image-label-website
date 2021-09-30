@@ -25,9 +25,9 @@ function Routes(props) {
           <Switch>
             <Route exact path={"/"} component={LoginScreen} />
             <Route path={"/signup"} component={SignUpScreen} />
+            <Route path={"/dashboard"} component={DashboardScreen} />
             <Route path={"/about"} component={AboutScreen} />
             <Route path={"/console"} component={ConsoleScreen} />
-            <Route path={"/dashboard"} component={DashboardScreen} />
             <Route path={"/imagemap"} component={ImageMapScreen} />
             <Route path={"/pipeline"} component={PipelineScreen} />
             <Route path={"/relabel"} component={RelabelScreen} />

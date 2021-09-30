@@ -1,8 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+import { auth, signIn } from "../../firebase";
+import { signInWithEmailAndPassword } from "@firebase/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 import loginhero from "../../images/hololens.jpg";
-// import { firebase } from "../../firebase/firebase";
 
 export const LoginScreen = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, loading, error] = useAuthState(auth);
+  const history = useHistory();
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+    if (user) history.replace("/dashboard");
+  }, [user, loading]);
 
   return (
     <div>
@@ -18,20 +32,48 @@ export const LoginScreen = () => {
             <form method="post" action="#">
               <div class="fields">
                 <div class="field">
-                  <label for="name">Username</label>
-                  <input type="text" name="name" id="name" value="" />
+                  <label for="email">Username</label>
+                  <input
+                    type="text"
+                    name="email"
+                    id="name"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div class="field">
-                  <label for="email">Password</label>
-                  <input type="email" name="email" id="email" value="" />
+                  <label for="password">Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    id="email"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
-
               </div>
               <ul class="actions special" >
-                <li><input type="submit" name="submit" id="submit" value="Login" /></li>
+                <li>
+                  <input
+                    type="submit"
+                    name="submit"
+                    id="submit"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      signInWithEmailAndPassword(auth, email, password)
+                        .then((userCredential) => {
+                          const user = userCredential.user;
+                          history.push("/dashboard");
+                        })
+                        .catch((error) => {
+                          console.log(error);
+                          alert(error);
+                        })
+                    }}
+                  />
+                </li>
               </ul>
             </form>
-
           </div>
 
 

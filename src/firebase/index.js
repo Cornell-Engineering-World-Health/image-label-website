@@ -1,7 +1,9 @@
-import firebase from "firebase";
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 // Optionally import the services that you want to use
-import "firebase/auth";
+//import "firebase/auth";
 //import "firebase/database";
 //import "firebase/firestore";
 //import "firebase/functions";
@@ -17,14 +19,14 @@ const firebaseConfig = {
   appId: "1:2925612514:web:4d74fd413fb2b2aeecfdbb"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
-const auth = app.auth();
-const db = app.firestore();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Sign in a user
-const signInWithEmailAndPassword = async (email, password) => {
+const signIn = async (email, password) => {
   try {
-    await auth.signInWithEmailAndPassword(email, password);
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (err) {
     console.error(err);
     alert(err.message);
@@ -32,9 +34,9 @@ const signInWithEmailAndPassword = async (email, password) => {
 };
 
 // Register a user with email & password
-const registerWithEmailAndPassword = async (name, email, password) => {
+const signUp = async (name, email, password) => {
   try {
-    const res = await auth.createUserWithEmailAndPassword(email, password);
+    const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
     await db.collection("users").add({
       uid: user.uid,
@@ -56,9 +58,7 @@ const logout = () => {
 export {
   auth,
   db,
-  signInWithGoogle,
-  signInWithEmailAndPassword,
-  registerWithEmailAndPassword,
-  sendPasswordResetEmail,
+  signIn,
+  signUp,
   logout,
 };
