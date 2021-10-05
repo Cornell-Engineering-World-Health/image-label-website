@@ -1,12 +1,102 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { db } from "../../firebase/firebase.js";
+import { getDocs, collection, query } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
+import { fireEvent } from "@testing-library/dom";
+
+const styles = {
+  image: {
+    width: "100%",
+  }
+}
 
 export const ConsoleScreen = () => {
+  // [images] stores each image URL and its metadata.
+  // Requires: an element in [images] has type {url: [string], metadata: [array object]}
+  const [images, setImages] = useState([]);
+
+  useEffect(() => {
+    // [downloadImage(url)] GETS the URL and metadata of [imagePrefix]
+    // and stores this in [images]
+    // Requires: [imagePrefix] is a valid folder prefix.
+    // An example of a valid folder prefix is 'images/task1'.
+    async function downloadImage(imagePrefix) {
+      const storage = getStorage();
+      const imageRef = ref(storage, imagePrefix);
+
+      // GET [imagePrefix] URL
+      await getDownloadURL(ref(storage, imagePrefix))
+        .then((url) => {
+
+          // Get metadata properties
+          getMetadata(imageRef)
+            .then((fullMetadata) => {
+              // Store the URL & metadata in [images]
+              setImages(prevArray =>
+                [...prevArray,
+                {
+                  url: url,
+                  metadata: fullMetadata.customMetadata
+                }]
+              )
+            })
+            .catch((error) => {
+              // Error getting metadata
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          // Error getting URL
+          console.log(error);
+        });
+    }
+
+    // [getAllImages()] GETS all the users, and extracts all images associated with
+    // that specific user. 
+    // Requires: there is at least 1 user in the collection.
+    async function getAllImages() {
+      const q = query(collection(db, "users"));
+      const querySnapshot = await getDocs(q);
+
+      querySnapshot.forEach(async (doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        const imagesPerUser = doc.data().images;
+        imagesPerUser.forEach(image => {
+          // GET URL & metadata of the image
+          downloadImage(image);
+        })
+      });
+    }
+
+    getAllImages();
+  }, [])
+
+  // [handleGetImages] translates [images] into HTML elements
+  const handleGetImages = (images) => {
+    return images.map((imageData) => {
+      return (
+        <div class="grid-item">
+          <span class="image left">
+            <img src={imageData.url} style={styles.image} alt="" />
+          </span>
+          <br />
+          <span>
+            <a href="">Image Details</a>
+            <br />{imageData.metadata.date}
+            <br /> {imageData.metadata.user_id}
+            <br />
+          </span>
+        </div>
+      );
+    })
+  }
 
   return (
     <div>
       <section class="wrapper style1 align-center">
         <div class="inner">
           <h2>Admin Console</h2>
+          {images.length > 0 ? console.log(images) : console.log("empty")}
           <p>filter and download the image data by click (graphical Interface).</p>
           <div class="index align-left">
 
@@ -113,51 +203,16 @@ export const ConsoleScreen = () => {
               </ul>
             </section>
 
+
+            <section>
+
+            </section>
+
             <section>
               <div class="grid-container">
-                <div class="grid-item">
-                  <span class="image left"><img src="images/pic01.jpg" alt="" /></span><br />
-                  <span>
-                    <a href="">Image Details</a>
-                    <br />Time of Image Upload
-                    <br />Number of labels
-                    <br /> User Id <br />
-                  </span>
-                </div>
-
-                <div class="grid-item">
-                  <span class="image left"><img src="images/pic02.jpg" alt="" /></span><br />
-                  <span>
-                    <a href="">Image Details</a>
-                    <br />Time of Image Upload
-                    <br />Number of labels
-                    <br /> User Id <br />
-                  </span>
-
-                </div>
-
-                <div class="grid-item">
-                  <span class="image left"><img src="images/pic03.jpg" alt="" /></span><br />
-                  <span>
-                    <a href="">Image Details</a>
-                    <br />Time of Image Upload
-                    <br />Number of labels
-                    <br /> User Id <br />
-                  </span>
-
-                </div>
-
-                <div class="grid-item">
-                  <span class="image left"><img src="images/pic04.jpg" alt="" /></span><br />
-                  <span>
-                    <a href="">Image Details</a>
-                    <br />Time of Image Upload
-                    <br />Number of labels
-                    <br /> User Id <br />
-                  </span>
-
-                </div>
-
+                {images.length > 0 && (
+                  handleGetImages(images)
+                )}
               </div>
             </section>
           </div>

@@ -1,29 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import { auth, signIn } from "../../firebase";
+import { NavLink, useHistory } from "react-router-dom";
+import { auth } from "../../firebase/firebase";
 import { signInWithEmailAndPassword } from "@firebase/auth";
-import { useAuthState } from "react-firebase-hooks/auth";
 import loginhero from "../../images/hololens.jpg";
+
+const styles = {
+  error: {
+    color: "red",
+  }
+}
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [user, loading, error] = useAuthState(auth);
+  const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
-
-  useEffect(() => {
-    if (loading) {
-      return;
-    }
-    if (user) history.replace("/dashboard");
-  }, [user, loading]);
 
   return (
     <div>
       {/* Wrapper */}
       <div id="wrapper" class="divided">
 
-        {/* One */}
         <section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
           <div class="content">
             <h1>Auro Image</h1>
@@ -52,6 +49,7 @@ export const LoginScreen = () => {
                   />
                 </div>
               </div>
+              <p style={styles.error}>{errorMessage}</p>
               <ul class="actions special" >
                 <li>
                   <input
@@ -60,22 +58,36 @@ export const LoginScreen = () => {
                     id="submit"
                     onClick={(e) => {
                       e.preventDefault();
-                      signInWithEmailAndPassword(auth, email, password)
-                        .then((userCredential) => {
-                          const user = userCredential.user;
-                          history.push("/dashboard");
-                        })
-                        .catch((error) => {
-                          console.log(error);
-                          alert(error);
-                        })
+                      if (email === "") {
+                        setErrorMessage("Please enter in a valid email.");
+                      } else if (password === "") {
+                        setErrorMessage("Please enter in a password.");
+                      } else {
+                        signInWithEmailAndPassword(auth, email, password)
+                          .then((userCredential) => {
+                            const user = userCredential.user;
+                            setErrorMessage("");
+                            history.push("/dashboard");
+                          })
+                          .catch((error) => {
+                            if (error.code === "auth/wrong-password") {
+                              setErrorMessage("Wrong password. Please try again.");
+                            } else if (error.code === "auth/user-not-found") {
+                              setErrorMessage("Username not found.");
+                            } else {
+                              setErrorMessage("Login failed. Please try again at a later time.")
+                            }
+                            console.log(error.code);
+                            //console.log(error.message)
+                          })
+                      }
                     }}
                   />
                 </li>
               </ul>
+              <p> No account? <NavLink to={"/signup"}>Sign up</NavLink></p>
             </form>
           </div>
-
 
           <div class="image">
             <img src={loginhero} alt="" />

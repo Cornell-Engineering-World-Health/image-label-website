@@ -1,12 +1,13 @@
 import React from "react";
 
 export const ImageMapScreen = () => {
-
   return (
     <div id="wrapper" class="divided">
       <section class="wrapper style1 align-center">
         <div class="inner">
           <h2>Image Map</h2>
+          <img src="" id="myimg" />
+
           <div class="index align-left">
             <section>
 
