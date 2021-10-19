@@ -3,7 +3,7 @@ import { db } from "../../firebase/firebase.js";
 import { getDocs, collection, query } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
 import { fireEvent } from "@testing-library/dom";
-import { Dropdown, Grid, Input, Icon } from "semantic-ui-react";
+import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
 
 const styles = {
   image: {
@@ -17,6 +17,24 @@ export const ConsoleScreen = () => {
   const [images, setImages] = useState([]);
   const [filterUsers, setFilterUser] = useState([]);
   const [filterTasks, setFilterTask] = useState([]);
+
+  const tasks = [
+    {
+      key: "task1",
+      text: "task1",
+      value: "task1",
+    },
+    {
+      key: "task2",
+      text: "task2",
+      value: "task2",
+    },
+    {
+      key: "task3",
+      text: "task3",
+      value: "task3",
+    },
+  ];
 
   useEffect(() => {
     // [downloadImage(url)] GETS the URL and metadata of [imagePrefix]
@@ -99,11 +117,25 @@ export const ConsoleScreen = () => {
     return filterUsers.map((email) => {
       return (
         <>
+          <Label color="yellow">User</Label>
           <Input
-            label="User"
-            style={{ paddingBottom: "20px", paddingRight: "80px" }}
+            style={{ marginBottom: "20px", marginRight: "80px" }}
+            onChange={(e) => {
+              var changed = [...filterUsers];
+              changed[filterUsers.indexOf(email)] = e.target.value;
+              setFilterUser(changed);
+            }}
+            value={email}
           />
-          <button> remove </button>
+          <button
+            onClick={() => {
+              var removed = [...filterUsers];
+              removed.splice(filterUsers.indexOf(email), 1);
+              setFilterUser(removed);
+            }}
+          >
+            remove
+          </button>
           <br />
         </>
       );
@@ -115,11 +147,29 @@ export const ConsoleScreen = () => {
     return filterTasks.map((task) => {
       return (
         <>
-          <Input
-            label="Task"
-            style={{ paddingBottom: "20px", paddingRight: "80px" }}
+          <Label color="blue">Task</Label>
+          <Dropdown
+            placeholder="Select task"
+            search
+            selection
+            options={tasks}
+            style={{ marginBottom: "20px", marginRight: "80px" }}
+            onChange={(e, d) => {
+              var changed = [...filterTasks];
+              changed[filterTasks.indexOf(task)] = d.value;
+              setFilterTask(changed);
+            }}
+            value={task}
           />
-          <button style={{ innerHeight: "10px" }}> remove </button>
+          <button
+            onClick={() => {
+              var removed = [...filterTasks];
+              removed.splice(filterTasks.indexOf(task), 1);
+              setFilterTask(removed);
+            }}
+          >
+            remove
+          </button>
           <br />
         </>
       );
@@ -163,41 +213,6 @@ export const ConsoleScreen = () => {
                 {showUserList(filterUsers)}
                 {showTaskList(filterTasks)}
               </div>
-
-              {/* <div class="field half">
-                <select name="filter" id="filter">
-                  <option value="">- Add Filters -</option>
-                  <option value="0">user</option>
-                  <option value="1">task</option>
-                </select>
-              </div>
-              <div class="content">
-                <form method="post" action="#">
-                  <div class="fields">
-                    <div class="field half">
-                      <label for="name">User ID</label>
-                      <input type="text" name="userid" id="userid" value="" />
-                    </div>
-
-                    <div class="field half"></div>
-
-                    <div class="field half">
-                      <label for="image">Image Type</label>
-                      <select name="image" id="image">
-                        <option value="">- Category -</option>
-                        <option value="0">SELECT ALL</option>
-                        <option value="1">Indian Currency</option>
-                        <option value="2">People</option>
-                        <option value="3">Document-Text-OCR</option>
-                        <option value="4">Stairs</option>
-                        <option value="5">Doors</option>
-                        <option value="6">Indian Bus</option>
-                      </select>
-                    </div>
-                    <div class="field half"></div>
-                  </div>
-                </form>
-              </div> */}
             </section>
 
             <section>
