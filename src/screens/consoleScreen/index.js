@@ -3,17 +3,38 @@ import { db } from "../../firebase/firebase.js";
 import { getDocs, collection, query } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
 import { fireEvent } from "@testing-library/dom";
+import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
 
 const styles = {
   image: {
     width: "100%",
-  }
-}
+  },
+};
 
 export const ConsoleScreen = () => {
   // [images] stores each image URL and its metadata.
   // Requires: an element in [images] has type {url: [string], metadata: [array object]}
   const [images, setImages] = useState([]);
+  const [filterUsers, setFilterUser] = useState([]);
+  const [filterTasks, setFilterTask] = useState([]);
+
+  const tasks = [
+    {
+      key: "task1",
+      text: "task1",
+      value: "task1",
+    },
+    {
+      key: "task2",
+      text: "task2",
+      value: "task2",
+    },
+    {
+      key: "task3",
+      text: "task3",
+      value: "task3",
+    },
+  ];
 
   useEffect(() => {
     // [downloadImage(url)] GETS the URL and metadata of [imagePrefix]
@@ -27,18 +48,17 @@ export const ConsoleScreen = () => {
       // GET [imagePrefix] URL
       await getDownloadURL(ref(storage, imagePrefix))
         .then((url) => {
-
           // Get metadata properties
           getMetadata(imageRef)
             .then((fullMetadata) => {
               // Store the URL & metadata in [images]
-              setImages(prevArray =>
-                [...prevArray,
+              setImages((prevArray) => [
+                ...prevArray,
                 {
                   url: url,
-                  metadata: fullMetadata.customMetadata
-                }]
-              )
+                  metadata: fullMetadata.customMetadata,
+                },
+              ]);
             })
             .catch((error) => {
               // Error getting metadata
@@ -52,7 +72,7 @@ export const ConsoleScreen = () => {
     }
 
     // [getAllImages()] GETS all the users, and extracts all images associated with
-    // that specific user. 
+    // that specific user.
     // Requires: there is at least 1 user in the collection.
     async function getAllImages() {
       const q = query(collection(db, "users"));
@@ -61,35 +81,100 @@ export const ConsoleScreen = () => {
       querySnapshot.forEach(async (doc) => {
         // doc.data() is never undefined for query doc snapshots
         const imagesPerUser = doc.data().images;
-        imagesPerUser.forEach(image => {
+        imagesPerUser.forEach((image) => {
           // GET URL & metadata of the image
           downloadImage(image);
-        })
+        });
       });
     }
 
     getAllImages();
-  }, [])
+  }, []);
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
     return images.map((imageData) => {
       return (
-        <div class="grid-item">
+        <Grid.Column key={imageData.url}>
           <span class="image left">
             <img src={imageData.url} style={styles.image} alt="" />
           </span>
           <br />
           <span>
             <a href="">Image Details</a>
-            <br />{imageData.metadata.date}
+            <br />
+            {imageData.metadata.date}
             <br /> {imageData.metadata.user_id}
             <br />
           </span>
-        </div>
+        </Grid.Column>
       );
-    })
-  }
+    });
+  };
+
+  // [showUserList] shows the text fields for user emails
+  const showUserList = (filterUsers) => {
+    return filterUsers.map((email) => {
+      return (
+        <>
+          <Label color="yellow">User</Label>
+          <Input
+            style={{ marginBottom: "20px", marginRight: "80px" }}
+            onChange={(e) => {
+              var changed = [...filterUsers];
+              changed[filterUsers.indexOf(email)] = e.target.value;
+              setFilterUser(changed);
+            }}
+            value={email}
+          />
+          <button
+            onClick={() => {
+              var removed = [...filterUsers];
+              removed.splice(filterUsers.indexOf(email), 1);
+              setFilterUser(removed);
+            }}
+          >
+            remove
+          </button>
+          <br />
+        </>
+      );
+    });
+  };
+
+  // [showUserList] shows the text fields for user emails
+  const showTaskList = (filterTasks) => {
+    return filterTasks.map((task) => {
+      return (
+        <>
+          <Label color="blue">Task</Label>
+          <Dropdown
+            placeholder="Select task"
+            search
+            selection
+            options={tasks}
+            style={{ marginBottom: "20px", marginRight: "80px" }}
+            onChange={(e, d) => {
+              var changed = [...filterTasks];
+              changed[filterTasks.indexOf(task)] = d.value;
+              setFilterTask(changed);
+            }}
+            value={task}
+          />
+          <button
+            onClick={() => {
+              var removed = [...filterTasks];
+              removed.splice(filterTasks.indexOf(task), 1);
+              setFilterTask(removed);
+            }}
+          >
+            remove
+          </button>
+          <br />
+        </>
+      );
+    });
+  };
 
   return (
     <div>
@@ -97,123 +182,43 @@ export const ConsoleScreen = () => {
         <div class="inner">
           <h2>Admin Console</h2>
           {images.length > 0 ? console.log(images) : console.log("empty")}
-          <p>filter and download the image data by click (graphical Interface).</p>
+          <p>
+            filter and download the image data by click (graphical Interface).
+          </p>
           <div class="index align-left">
-
-
             <section>
-              <header>
-                <h3>Filter by</h3>
-              </header>
-              <div class="content">
-
-                <form method="post" action="#">
-                  <div class="fields">
-                    <div class="field half">
-                      <label for="name">Start Date</label>
-                      <input type="date" id="start" name="trip-start" />
-                    </div>
-                    <div class="field half">
-                      <label for="name">End Date</label>
-                      <input type="date" id="end" name="trip-end" />
-                    </div>
-
-
-                    <div class="field half">
-                      <label for="name">Group ID</label>
-                      <input type="text" name="groupid" id="groupid" value="" />
-                    </div>
-
-                    <div class="field half">
-                    </div>
-                    <div class="field half">
-                      <label for="name">User ID</label>
-                      <input type="text" name="userid" id="userid" value="" />
-                    </div>
-
-                    <div class="field half">
-                    </div>
-
-
-                    <div class="field half">
-                      <label for="image">Image Type</label>
-                      <select name="image" id="image">
-                        <option value="">- Category -</option>
-                        <option value="0">SELECT ALL</option>
-                        <option value="1">Indian Currency</option>
-                        <option value="2">People</option>
-                        <option value="3">Document-Text-OCR</option>
-                        <option value="4">Stairs</option>
-                        <option value="5">Doors</option>
-                        <option value="6">Indian Bus</option>
-                      </select>
-                    </div>
-                    <div class="field half">
-                    </div>
-
-                    <div class="field">
-                      <label for="name">Max number of Images</label>
-                    </div>
-                    <div class="field third">
-                      <input type="radio" id="priority-low" name="priority" checked />
-                      <label for="priority-low">All Images</label>
-                    </div>
-                    <div class="field third">
-                      <input type="radio" id="priority-normal" name="priority" />
-                      <label for="priority-normal">Top 100</label>
-                    </div>
-                    <div class="field third">
-                      <input type="radio" id="priority-high" name="priority" />
-                      <label for="priority-high">Top 10</label>
-                    </div>
-
-                  </div>
-                  <ul class="actions">
-                    <li><input type="submit" name="submit" id="submit" value="Filter" /></li>
-                  </ul>
-
-                </form>
-
+              <div>
+                <Dropdown text="+ Add Filter" floating>
+                  <Dropdown.Menu>
+                    <Dropdown.Header icon="tags" content="Filter by" />
+                    <Dropdown.Divider />
+                    <Dropdown.Item
+                      onClick={() => {
+                        setFilterUser([...filterUsers, ""]);
+                      }}
+                    >
+                      User Email
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => {
+                        setFilterTask([...filterTasks, ""]);
+                      }}
+                    >
+                      Task
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
+              </div>
+              <div>
+                {showUserList(filterUsers)}
+                {showTaskList(filterTasks)}
               </div>
             </section>
 
-
             <section>
-              <header>
-                <h3>Filter Results</h3>
-              </header>
-              <div class="content">
-
-
-                <ul class="alt">
-                  <li>Total Size of Filtered Images and Labels (MB): xxx MB</li>
-                  <li>Total Number of Images Filtered: yy</li>
-                  <li>Number of Users: zz</li>
-
-                </ul>
-
-              </div>
-              <br />
-
-            </section>
-
-            <section>
-              <ul class="actions">
-                <li><a href="#" class="button primary">Download Filtered data as Zip</a></li>
-              </ul>
-            </section>
-
-
-            <section>
-
-            </section>
-
-            <section>
-              <div class="grid-container">
-                {images.length > 0 && (
-                  handleGetImages(images)
-                )}
-              </div>
+              <Grid columns={2}>
+                {images.length > 0 && handleGetImages(images)}
+              </Grid>
             </section>
           </div>
         </div>
