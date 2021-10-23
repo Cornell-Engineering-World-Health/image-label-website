@@ -4,7 +4,7 @@ export const DashboardScreen = () => {
 
   return (
     <div>
-      <p>FUCK</p>
+      <p>please delete me</p>
     </div>
   );
 };
