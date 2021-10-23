@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { signOut, onAuthStateChanged } from "firebase/auth";
-import { NavLink, Link, useHistory } from 'react-router-dom';
+import { NavLink, Link, useHistory } from "react-router-dom";
 import { auth } from "../../firebase/firebase";
 
 export default function Navbar() {
@@ -22,7 +22,7 @@ export default function Navbar() {
 
   return authenticated ? (
     <nav class="banner wrapper sty align-center">
-      <NavLink to="/dashboard">Dashboard |</NavLink>
+      {/* <NavLink to="/dashboard">Dashboard |</NavLink> */}
       <NavLink to="/console"> Admin Console |</NavLink>
       <NavLink to="/relabel"> Relabel |</NavLink>
       <NavLink to="/imagemap"> Image Map |</NavLink>
@@ -30,13 +30,14 @@ export default function Navbar() {
       <Link
         onClick={(e) => {
           e.preventDefault();
-          signOut(auth).then(() => {
-            history.push("/");
-          }).catch((error) => {
-            console.log(error);
-          })
-        }
-        }
+          signOut(auth)
+            .then(() => {
+              history.push("/");
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }}
       >
         Sign Out
       </Link>

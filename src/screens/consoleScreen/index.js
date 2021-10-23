@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase/firebase.js";
+import { filterImages } from "../../firebase/images.js";
 import { getDocs, collection, query } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
 import { fireEvent } from "@testing-library/dom";
@@ -17,7 +18,10 @@ export const ConsoleScreen = () => {
   const [images, setImages] = useState([]);
   const [filterUsers, setFilterUser] = useState([]);
   const [filterTasks, setFilterTask] = useState([]);
+  const [filtered, setFilter] = useState(false);
+  const [initial, setInitialState] = useState(true); // initial view of console
 
+  //tasks must align with database
   const tasks = [
     {
       key: "task1",
@@ -36,60 +40,74 @@ export const ConsoleScreen = () => {
     },
   ];
 
+  // [downloadImage(url)] GETS the URL and metadata of [imagePrefix]
+  // and stores this in [images]
+  // Requires: [imagePrefix] is a valid folder prefix.
+  // An example of a valid folder prefix is 'images/task1'.
+  async function downloadImage(imagePrefix) {
+    const storage = getStorage();
+    const imageRef = ref(storage, imagePrefix);
+
+    // GET [imagePrefix] URL
+    await getDownloadURL(ref(storage, imagePrefix))
+      .then((url) => {
+        // Get metadata properties
+        getMetadata(imageRef)
+          .then((fullMetadata) => {
+            // Store the URL & metadata in [images]
+            setImages((prevArray) => [
+              ...prevArray,
+              {
+                url: url,
+                metadata: fullMetadata.customMetadata,
+              },
+            ]);
+          })
+          .catch((error) => {
+            // Error getting metadata
+            console.log(error);
+          });
+      })
+      .catch((error) => {
+        // Error getting URL
+        console.log(error);
+      });
+  }
+
   useEffect(() => {
-    // [downloadImage(url)] GETS the URL and metadata of [imagePrefix]
-    // and stores this in [images]
-    // Requires: [imagePrefix] is a valid folder prefix.
-    // An example of a valid folder prefix is 'images/task1'.
-    async function downloadImage(imagePrefix) {
-      const storage = getStorage();
-      const imageRef = ref(storage, imagePrefix);
+    if (initial) {
+      // [getAllImages()] GETS all the users, and extracts all images associated with
+      // that specific user.
+      // Requires: there is at least 1 user in the collection.
+      async function getAllImages() {
+        const q = query(collection(db, "users"));
+        const querySnapshot = await getDocs(q);
 
-      // GET [imagePrefix] URL
-      await getDownloadURL(ref(storage, imagePrefix))
-        .then((url) => {
-          // Get metadata properties
-          getMetadata(imageRef)
-            .then((fullMetadata) => {
-              // Store the URL & metadata in [images]
-              setImages((prevArray) => [
-                ...prevArray,
-                {
-                  url: url,
-                  metadata: fullMetadata.customMetadata,
-                },
-              ]);
-            })
-            .catch((error) => {
-              // Error getting metadata
-              console.log(error);
-            });
-        })
-        .catch((error) => {
-          // Error getting URL
-          console.log(error);
+        querySnapshot.forEach(async (doc) => {
+          // doc.data() is never undefined for query doc snapshots
+          const imagesPerUser = doc.data().images;
+          imagesPerUser.forEach((image) => {
+            // GET URL & metadata of the image
+            downloadImage(image);
+          });
         });
-    }
-
-    // [getAllImages()] GETS all the users, and extracts all images associated with
-    // that specific user.
-    // Requires: there is at least 1 user in the collection.
-    async function getAllImages() {
-      const q = query(collection(db, "users"));
-      const querySnapshot = await getDocs(q);
-
-      querySnapshot.forEach(async (doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        const imagesPerUser = doc.data().images;
-        imagesPerUser.forEach((image) => {
-          // GET URL & metadata of the image
+      }
+      getAllImages();
+    } else if (filtered) {
+      // filter results
+      async function getFilteredImages() {
+        const filteredImages = await filterImages(filterUsers, filterTasks);
+        console.log(filteredImages);
+        filteredImages.forEach((image) => {
           downloadImage(image);
         });
-      });
+      }
+      getFilteredImages();
+      setFilter(false);
     }
+  }, [initial, filtered]);
 
-    getAllImages();
-  }, []);
+  //limit initial load??
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
@@ -116,10 +134,14 @@ export const ConsoleScreen = () => {
   const showUserList = (filterUsers) => {
     return filterUsers.map((email) => {
       return (
-        <>
+        <div key={filterUsers.indexOf(email)}>
           <Label color="yellow">User</Label>
           <Input
-            style={{ marginBottom: "20px", marginRight: "80px" }}
+            style={{
+              width: "300px",
+              marginBottom: "20px",
+              marginRight: "80px",
+            }}
             onChange={(e) => {
               var changed = [...filterUsers];
               changed[filterUsers.indexOf(email)] = e.target.value;
@@ -137,23 +159,27 @@ export const ConsoleScreen = () => {
             remove
           </button>
           <br />
-        </>
+        </div>
       );
     });
   };
 
-  // [showUserList] shows the text fields for user emails
+  // [showTaskList] shows the text fields for tasks
   const showTaskList = (filterTasks) => {
     return filterTasks.map((task) => {
       return (
-        <>
+        <div key={filterTasks.indexOf(task)}>
           <Label color="blue">Task</Label>
           <Dropdown
             placeholder="Select task"
             search
             selection
             options={tasks}
-            style={{ marginBottom: "20px", marginRight: "80px" }}
+            style={{
+              width: "300px",
+              marginBottom: "20px",
+              marginRight: "80px",
+            }}
             onChange={(e, d) => {
               var changed = [...filterTasks];
               changed[filterTasks.indexOf(task)] = d.value;
@@ -171,7 +197,7 @@ export const ConsoleScreen = () => {
             remove
           </button>
           <br />
-        </>
+        </div>
       );
     });
   };
@@ -209,9 +235,29 @@ export const ConsoleScreen = () => {
                   </Dropdown.Menu>
                 </Dropdown>
               </div>
+
               <div>
                 {showUserList(filterUsers)}
                 {showTaskList(filterTasks)}
+                {filterUsers.length > 0 || filterTasks.length > 0 ? (
+                  <button
+                    onClick={() => {
+                      if (
+                        filterUsers.includes("") ||
+                        filterTasks.includes("")
+                      ) {
+                        alert("Error: Empty filter value(s)!");
+                      } else {
+                        setFilter(true); // new filter
+                        setInitialState(false); // not initial state
+                      }
+                    }}
+                  >
+                    Filter results
+                  </button>
+                ) : (
+                  <></>
+                )}
               </div>
             </section>
 

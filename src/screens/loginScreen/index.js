@@ -85,7 +85,7 @@ export const LoginScreen = () => {
                   />
                 </li>
               </ul>
-              <p> No account? <NavLink to={"/signup"}>Sign up</NavLink></p>
+              <p> No account? <NavLink to={"/console"}>Sign up</NavLink></p>
             </form>
           </div>
 
