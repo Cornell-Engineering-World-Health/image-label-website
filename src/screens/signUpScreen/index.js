@@ -69,7 +69,7 @@ export const SignUpScreen = () => {
                           .then((userCredential) => {
                             const user = userCredential.user;
                             setErrorMessage("");
-                            history.push("/dashboard");
+                            history.push("/console");
                           })
                           .catch((error) => {
                             if (error.code === "auth/wrong-password") {

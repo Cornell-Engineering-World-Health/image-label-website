@@ -15,9 +15,11 @@ export async function filterImages(emails, tasks) {
 
       if (docSnap.exists()) {
         const data = docSnap.data();
+        console.log(data);
         for (const k in data) {
           if (k.includes("@")) {
             //key is email
+            console.log(data[k]);
             images += data[k];
           }
         }
@@ -56,5 +58,6 @@ export async function filterImages(emails, tasks) {
       }
     });
   }
+  console.log(images);
   return images;
 }

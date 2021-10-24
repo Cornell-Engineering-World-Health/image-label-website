@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase/firebase.js";
-import { filterImages } from "../../firebase/images.js";
-import { getDocs, collection, query } from "firebase/firestore";
+import { doc, getDoc, getDocs, collection, query } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
-import { fireEvent } from "@testing-library/dom";
 import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
+import { filterImages } from "../../firebase/images";
 
 const styles = {
   image: {
@@ -19,7 +18,6 @@ export const ConsoleScreen = () => {
   const [filterUsers, setFilterUser] = useState([]);
   const [filterTasks, setFilterTask] = useState([]);
   const [filtered, setFilter] = useState(false);
-  const [initial, setInitialState] = useState(true); // initial view of console
 
   //tasks must align with database
   const tasks = [
@@ -74,40 +72,99 @@ export const ConsoleScreen = () => {
       });
   }
 
+  //initial console --- limit initial load??
   useEffect(() => {
-    if (initial) {
-      // [getAllImages()] GETS all the users, and extracts all images associated with
-      // that specific user.
-      // Requires: there is at least 1 user in the collection.
-      async function getAllImages() {
-        const q = query(collection(db, "users"));
-        const querySnapshot = await getDocs(q);
+    // [getAllImages()] GETS all the users, and extracts all images associated with
+    // that specific user.
+    // Requires: there is at least 1 user in the collection.
+    async function getAllImages() {
+      const q = query(collection(db, "users"));
+      const querySnapshot = await getDocs(q);
 
-        querySnapshot.forEach(async (doc) => {
-          // doc.data() is never undefined for query doc snapshots
-          const imagesPerUser = doc.data().images;
-          imagesPerUser.forEach((image) => {
-            // GET URL & metadata of the image
-            downloadImage(image);
-          });
-        });
-      }
-      getAllImages();
-    } else if (filtered) {
-      // filter results
-      async function getFilteredImages() {
-        const filteredImages = await filterImages(filterUsers, filterTasks);
-        console.log(filteredImages);
-        filteredImages.forEach((image) => {
+      querySnapshot.forEach(async (doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        const imagesPerUser = doc.data().images;
+        imagesPerUser.forEach((image) => {
+          // GET URL & metadata of the image
           downloadImage(image);
         });
+      });
+    }
+    getAllImages();
+  }, []);
+
+  //filtering
+  useEffect(() => {
+    if (filtered) {
+      setImages([]); // empty current console
+
+      // filter results
+      async function getFilteredImages() {
+        if (filterUsers.length === 0 && filterTasks.length === 0) {
+          // button click guarantees emails.length>0 && tasks.length>0;
+          alert("Internal error: Empty filter.");
+        } else if (filterUsers.length === 0) {
+          // only tasks
+          filterTasks.forEach(async (t) => {
+            const docRef = doc(db, "tasks", t);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+
+              for (const k in data) {
+                if (k.includes("@")) {
+                  //key is email
+                  data[k].forEach((image) => {
+                    downloadImage(image);
+                  });
+                }
+              }
+            } else {
+              console.log("No such task! Tried to get " + t);
+            }
+          });
+        } else if (filterTasks.length === 0) {
+          //only user
+          filterUsers.forEach(async (user) => {
+            const docRef = doc(db, "users", user);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+              docSnap.data().images.forEach((image) => {
+                downloadImage(image);
+              });
+            } else {
+              console.log("No such user! Tried to get " + user);
+            }
+          });
+        } else {
+          // both filter
+          filterTasks.forEach(async (t) => {
+            const docRef = doc(db, "tasks", t);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              for (const k in data) {
+                if (filterUsers.includes(k)) {
+                  //this task contains the user we're filter for
+                  data[k].forEach((image) => {
+                    downloadImage(image);
+                  });
+                }
+              }
+            } else {
+              console.log("No such task! Tried to get " + t);
+            }
+          });
+        }
       }
+
       getFilteredImages();
       setFilter(false);
     }
-  }, [initial, filtered]);
-
-  //limit initial load??
+  }, [filtered, filterUsers, filterTasks]);
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
@@ -207,7 +264,7 @@ export const ConsoleScreen = () => {
       <section class="wrapper style1 align-center">
         <div class="inner">
           <h2>Admin Console</h2>
-          {images.length > 0 ? console.log(images) : console.log("empty")}
+
           <p>
             filter and download the image data by click (graphical Interface).
           </p>
@@ -249,7 +306,6 @@ export const ConsoleScreen = () => {
                         alert("Error: Empty filter value(s)!");
                       } else {
                         setFilter(true); // new filter
-                        setInitialState(false); // not initial state
                       }
                     }}
                   >
