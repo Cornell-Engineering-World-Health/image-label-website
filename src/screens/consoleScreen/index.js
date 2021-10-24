@@ -3,7 +3,6 @@ import { db } from "../../firebase/firebase.js";
 import { doc, getDoc, getDocs, collection, query } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
 import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
-import { filterImages } from "../../firebase/images";
 
 const styles = {
   image: {
