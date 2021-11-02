@@ -331,8 +331,6 @@ export const ConsoleScreen = () => {
                 ) : (
                   <></>
                 )}
-
-
               </div>
             </section>
             <section>
