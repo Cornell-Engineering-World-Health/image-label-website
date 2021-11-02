@@ -175,7 +175,25 @@ export const ConsoleScreen = () => {
           </span>
           <br />
           <span>
-            <a href="">Image Details</a>
+            <button
+              onClick={() => {
+                const xhr = new XMLHttpRequest();
+                xhr.responseType = "blob";
+                xhr.onload = (event) => {
+                  const blob = xhr.response;
+                  var imgURL = window.URL.createObjectURL(blob);
+                  const tempLink = document.createElement("a");
+                  tempLink.href = imgURL;
+                  const fileType = blob.type.replace("image/", "."); //.jepg, for example
+                  tempLink.setAttribute("download", imageData.url + fileType);
+                  tempLink.click();
+                };
+                xhr.open("GET", imageData.url);
+                xhr.send();
+              }}
+            >
+              Download Image
+            </button>
             <br />
             {imageData.metadata.date}
             <br /> {imageData.metadata.user_id}
