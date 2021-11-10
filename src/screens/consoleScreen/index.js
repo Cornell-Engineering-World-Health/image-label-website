@@ -351,8 +351,9 @@ export const ConsoleScreen = () => {
               </div>
             </section>
             <section>
-              <button title="Download">Download</button>
-            </section>
+              <button title="Download">
+                Download
+              </button></section>
 
             <section>
               <Grid columns={2}>
