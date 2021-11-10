@@ -72,30 +72,6 @@ export const ConsoleScreen = () => {
       });
   }
 
-  // //initial console
-  // useEffect(() => {
-  //   // [getAllImages()] GETS all the users, and extracts all images associated with
-  //   // that specific user.
-  //   // Requires: there is at least 1 user in the collection.
-  //   async function getAllImages() {
-  //     const q = query(collection(db, "users"));
-  //     const querySnapshot = await getDocs(q);
-  //     var limit = 30; // limit to 30 images
-
-  //     querySnapshot.forEach(async (doc) => {
-  //       // doc.data() is never undefined for query doc snapshots
-  //       const imagesPerUser = doc.data().images;
-  //       imagesPerUser.forEach((image) => {
-  //         // GET URL & metadata of the image
-  //         downloadImage(image);
-  //         if (limit < 0) return;
-  //         limit -= 1;
-  //       });
-  //     });
-  //   }
-  //   getAllImages();
-  // }, []);
-
   // no filter
   useEffect(() => {
     // [getAllImages()] GETS all the users, and extracts all images associated with
