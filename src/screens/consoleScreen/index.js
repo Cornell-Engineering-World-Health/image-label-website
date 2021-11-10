@@ -16,7 +16,8 @@ export const ConsoleScreen = () => {
   const [images, setImages] = useState([]);
   const [filterUsers, setFilterUser] = useState([]);
   const [filterTasks, setFilterTask] = useState([]);
-  const [filtered, setFilter] = useState(false);
+  const [filtered, setFilter] = useState(false); // new filter applied
+  const [noFilter, setNoFilter] = useState(true); // no filter set
 
   //tasks must align with database
   const tasks = [
@@ -71,7 +72,31 @@ export const ConsoleScreen = () => {
       });
   }
 
-  //initial console --- limit initial load??
+  // //initial console
+  // useEffect(() => {
+  //   // [getAllImages()] GETS all the users, and extracts all images associated with
+  //   // that specific user.
+  //   // Requires: there is at least 1 user in the collection.
+  //   async function getAllImages() {
+  //     const q = query(collection(db, "users"));
+  //     const querySnapshot = await getDocs(q);
+  //     var limit = 30; // limit to 30 images
+
+  //     querySnapshot.forEach(async (doc) => {
+  //       // doc.data() is never undefined for query doc snapshots
+  //       const imagesPerUser = doc.data().images;
+  //       imagesPerUser.forEach((image) => {
+  //         // GET URL & metadata of the image
+  //         downloadImage(image);
+  //         if (limit < 0) return;
+  //         limit -= 1;
+  //       });
+  //     });
+  //   }
+  //   getAllImages();
+  // }, []);
+
+  // no filter
   useEffect(() => {
     // [getAllImages()] GETS all the users, and extracts all images associated with
     // that specific user.
@@ -79,6 +104,7 @@ export const ConsoleScreen = () => {
     async function getAllImages() {
       const q = query(collection(db, "users"));
       const querySnapshot = await getDocs(q);
+      var limit = 30; // limit to 30 images
 
       querySnapshot.forEach(async (doc) => {
         // doc.data() is never undefined for query doc snapshots
@@ -86,11 +112,15 @@ export const ConsoleScreen = () => {
         imagesPerUser.forEach((image) => {
           // GET URL & metadata of the image
           downloadImage(image);
+          if (limit < 0) return;
+          limit -= 1;
         });
       });
     }
-    getAllImages();
-  }, []);
+    if (noFilter) {
+      getAllImages();
+    }
+  }, [noFilter]);
 
   //filtering
   useEffect(() => {
@@ -228,6 +258,11 @@ export const ConsoleScreen = () => {
               var removed = [...filterUsers];
               removed.splice(filterUsers.indexOf(email), 1);
               setFilterUser(removed);
+
+              // no filter: show default
+              if (removed.length === 0 && filterTasks.length === 0) {
+                setNoFilter(true);
+              }
             }}
           >
             remove
@@ -266,6 +301,11 @@ export const ConsoleScreen = () => {
               var removed = [...filterTasks];
               removed.splice(filterTasks.indexOf(task), 1);
               setFilterTask(removed);
+
+              // no filter: show default
+              if (removed.length === 0 && filterUsers.length === 0) {
+                setNoFilter(true);
+              }
             }}
           >
             remove
@@ -322,7 +362,8 @@ export const ConsoleScreen = () => {
                       ) {
                         alert("Error: Empty filter value(s)!");
                       } else {
-                        setFilter(true); // new filter
+                        setFilter(true); // new filter applied
+                        setNoFilter(false);
                       }
                     }}
                   >
@@ -334,9 +375,8 @@ export const ConsoleScreen = () => {
               </div>
             </section>
             <section>
-              <button title="Download">
-                Download
-              </button></section>
+              <button title="Download">Download</button>
+            </section>
 
             <section>
               <Grid columns={2}>
