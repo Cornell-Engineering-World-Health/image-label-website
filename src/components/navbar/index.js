@@ -25,7 +25,7 @@ export default function Navbar() {
       {/* <NavLink to="/dashboard">Dashboard |</NavLink> */}
       <NavLink to="/console"> Admin Console |</NavLink>
       <NavLink to="/relabel"> Relabel |</NavLink>
-      <NavLink to="/imagemap"> Image Map |</NavLink>
+      <NavLink to="/bugreports"> Bug Reports |</NavLink>
       <NavLink to="/pipeline"> Task Pipeline |</NavLink>
       <Link
         onClick={(e) => {
