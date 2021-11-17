@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { db } from "../../firebase/firebase.js";
-import { doc, getDoc, getDocs, collection, query } from "firebase/firestore";
-import { getStorage, ref, getDownloadURL, getMetadata } from "firebase/storage";
-import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
+import React, { useEffect, useState } from 'react';
+import { db } from '../../firebase/firebase.js';
+import { doc, getDoc, getDocs, collection, query } from 'firebase/firestore';
+import { getStorage, ref, getDownloadURL, getMetadata } from 'firebase/storage';
+import { Dropdown, Grid, Input, Label } from 'semantic-ui-react';
 
 const styles = {
   image: {
-    width: "100%",
+    width: '100%',
   },
 };
 
@@ -22,19 +22,19 @@ export const ConsoleScreen = () => {
   //tasks must align with database
   const tasks = [
     {
-      key: "task1",
-      text: "task1",
-      value: "task1",
+      key: 'task1',
+      text: 'task1',
+      value: 'task1',
     },
     {
-      key: "task2",
-      text: "task2",
-      value: "task2",
+      key: 'task2',
+      text: 'task2',
+      value: 'task2',
     },
     {
-      key: "task3",
-      text: "task3",
-      value: "task3",
+      key: 'devices',
+      text: 'devices',
+      value: 'devices',
     },
   ];
 
@@ -78,7 +78,7 @@ export const ConsoleScreen = () => {
     // that specific user.
     // Requires: there is at least 1 user in the collection.
     async function getAllImages() {
-      const q = query(collection(db, "users"));
+      const q = query(collection(db, 'users'));
       const querySnapshot = await getDocs(q);
       var limit = 30; // limit to 30 images
 
@@ -107,18 +107,18 @@ export const ConsoleScreen = () => {
       async function getFilteredImages() {
         if (filterUsers.length === 0 && filterTasks.length === 0) {
           // button click guarantees emails.length>0 && tasks.length>0;
-          alert("Internal error: Empty filter.");
+          alert('Internal error: Empty filter.');
         } else if (filterUsers.length === 0) {
           // only tasks
           filterTasks.forEach(async (t) => {
-            const docRef = doc(db, "tasks", t);
+            const docRef = doc(db, 'tasks', t);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
               const data = docSnap.data();
 
               for (const k in data) {
-                if (k.includes("@")) {
+                if (k.includes('@')) {
                   //key is email
                   data[k].forEach((image) => {
                     downloadImage(image);
@@ -126,13 +126,13 @@ export const ConsoleScreen = () => {
                 }
               }
             } else {
-              console.log("No such task! Tried to get " + t);
+              console.log('No such task! Tried to get ' + t);
             }
           });
         } else if (filterTasks.length === 0) {
           //only user
           filterUsers.forEach(async (user) => {
-            const docRef = doc(db, "users", user);
+            const docRef = doc(db, 'users', user);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -140,13 +140,13 @@ export const ConsoleScreen = () => {
                 downloadImage(image);
               });
             } else {
-              console.log("No such user! Tried to get " + user);
+              console.log('No such user! Tried to get ' + user);
             }
           });
         } else {
           // both filter
           filterTasks.forEach(async (t) => {
-            const docRef = doc(db, "tasks", t);
+            const docRef = doc(db, 'tasks', t);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -160,7 +160,7 @@ export const ConsoleScreen = () => {
                 }
               }
             } else {
-              console.log("No such task! Tried to get " + t);
+              console.log('No such task! Tried to get ' + t);
             }
           });
         }
@@ -184,17 +184,17 @@ export const ConsoleScreen = () => {
             <button
               onClick={() => {
                 const xhr = new XMLHttpRequest();
-                xhr.responseType = "blob";
+                xhr.responseType = 'blob';
                 xhr.onload = (event) => {
                   const blob = xhr.response;
                   var imgURL = window.URL.createObjectURL(blob);
-                  const tempLink = document.createElement("a");
+                  const tempLink = document.createElement('a');
                   tempLink.href = imgURL;
-                  const fileType = blob.type.replace("image/", "."); //.jepg, for example
-                  tempLink.setAttribute("download", imageData.url + fileType);
+                  const fileType = blob.type.replace('image/', '.'); //.jepg, for example
+                  tempLink.setAttribute('download', imageData.url + fileType);
                   tempLink.click();
                 };
-                xhr.open("GET", imageData.url);
+                xhr.open('GET', imageData.url);
                 xhr.send();
               }}
             >
@@ -218,9 +218,9 @@ export const ConsoleScreen = () => {
           <Label color="yellow">User</Label>
           <Input
             style={{
-              width: "300px",
-              marginBottom: "20px",
-              marginRight: "80px",
+              width: '300px',
+              marginBottom: '20px',
+              marginRight: '80px',
             }}
             onChange={(e) => {
               var changed = [...filterUsers];
@@ -261,9 +261,9 @@ export const ConsoleScreen = () => {
             selection
             options={tasks}
             style={{
-              width: "300px",
-              marginBottom: "20px",
-              marginRight: "80px",
+              width: '300px',
+              marginBottom: '20px',
+              marginRight: '80px',
             }}
             onChange={(e, d) => {
               var changed = [...filterTasks];
@@ -310,14 +310,14 @@ export const ConsoleScreen = () => {
                     <Dropdown.Divider />
                     <Dropdown.Item
                       onClick={() => {
-                        setFilterUser([...filterUsers, ""]);
+                        setFilterUser([...filterUsers, '']);
                       }}
                     >
                       User Email
                     </Dropdown.Item>
                     <Dropdown.Item
                       onClick={() => {
-                        setFilterTask([...filterTasks, ""]);
+                        setFilterTask([...filterTasks, '']);
                       }}
                     >
                       Task
@@ -333,10 +333,10 @@ export const ConsoleScreen = () => {
                   <button
                     onClick={() => {
                       if (
-                        filterUsers.includes("") ||
-                        filterTasks.includes("")
+                        filterUsers.includes('') ||
+                        filterTasks.includes('')
                       ) {
-                        alert("Error: Empty filter value(s)!");
+                        alert('Error: Empty filter value(s)!');
                       } else {
                         setFilter(true); // new filter applied
                         setNoFilter(false);
@@ -351,9 +351,8 @@ export const ConsoleScreen = () => {
               </div>
             </section>
             <section>
-              <button title="Download">
-                Download
-              </button></section>
+              <button title="Download">Download</button>
+            </section>
 
             <section>
               <Grid columns={2}>
