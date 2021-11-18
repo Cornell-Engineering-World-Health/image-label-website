@@ -128,9 +128,6 @@ export const PipelineScreen = () => {
   const [usersList, setUsersList] = useState([]);
   const [groupsList, setGroupsList] = useState([]);
   const [tasksList, setTasksList] = useState([]);
-  // const [assignToUser, setAssignToUser] = useState("");
-  // const [assignToGroup, setAssignToGroup] = useState("");
-  // const [assignTask, setAssignTask] = useState("");
 
   useEffect(() => {
     //gets all users and tasks in the database
