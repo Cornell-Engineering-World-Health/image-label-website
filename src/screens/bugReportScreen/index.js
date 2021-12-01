@@ -1,7 +1,6 @@
 import React from "react";
 import { db } from "../../firebase/firebase.js";
-import { doc, getDoc, getDocs, collection, query } from "firebase/firestore";
-import { returnStatement } from "@babel/types";
+import { getDocs, collection, query } from "firebase/firestore";
 
 function BugReport(email, message, time) {
   return (<body>
@@ -12,7 +11,7 @@ function BugReport(email, message, time) {
 }
 
 export const BugReportScreen = () => {
-  const getReports = () => {
+  function getReports() {
     const allReports = query(collection(db, "bugs"));
     const querySnapshot = getDocs(allReports);
     const componentList = querySnapshot.map((docSnap) =>
@@ -23,10 +22,9 @@ export const BugReportScreen = () => {
     return componentList
   }
   return (
-
-    <div id="wrapper" class="divided">
-      <h1>hi!!</h1>
-      <ul>getReports()</ul>
+    <div>
+      <h1>testText</h1>
+      <ul>{getReports()}</ul>
     </div>
   );
 };
