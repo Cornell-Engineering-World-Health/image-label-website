@@ -1,8 +1,14 @@
-import { secondaryAuth } from "./setup";
+import { secondaryAuth, db } from "./setup";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, updateDoc, getDoc, arrayUnion, setDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  updateDoc,
+  doc,
+  arrayUnion,
+} from "firebase/firestore";
 
-export const createUser = (email) => {
+export const createUser = (email, group) => {
   createUserWithEmailAndPassword(secondaryAuth, email, "aurolabdefaultpassword")
     .then(function (firebaseUser) {
       alert(
@@ -10,8 +16,19 @@ export const createUser = (email) => {
       );
       secondaryAuth.signOut();
     })
-    .then(() => {
+    .then(async () => {
       //add to firestore
+      await addDoc(collection(db, "users"), {
+        email: email,
+        currentTask: null,
+        groupID: group,
+        isAdmin: false,
+      });
+
+      //add to userList
+      await updateDoc(doc(db, "lists", "userList"), {
+        users: arrayUnion(email),
+      });
     })
     .catch((error) => {
       alert(error);

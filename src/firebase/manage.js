@@ -105,7 +105,7 @@ export async function assignTaskToUser(assignToUser, assignTask) {
 export async function assignTaskToGroup(assignToGroup, assignTask) {
   try {
     const usersRef = collection(db, "users");
-    const q = query(usersRef, where("group", "==", assignToGroup));
+    const q = query(usersRef, where("groupID", "==", assignToGroup));
 
     const querySnapshot = await getDocs(q);
 

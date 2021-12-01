@@ -6,6 +6,7 @@ import * as manage from "../../firebase/manage.js";
 export const PipelineScreen = () => {
   // *******************************  CREATE USER **************************************
   const [email, setEmail] = useState("");
+  const [userGroup, setUserGroup] = useState("");
 
   function createUser() {
     if (email.indexOf("@") === -1) {
@@ -13,7 +14,7 @@ export const PipelineScreen = () => {
       return;
     }
 
-    authentication.createUser(email);
+    authentication.createUser(email, userGroup);
 
     setEmail("");
   }
@@ -54,7 +55,7 @@ export const PipelineScreen = () => {
               type="text"
               name="label"
               id="label"
-              value={labels[idx]}
+              value={l}
               onChange={(e) => {
                 var edited = [...labels];
                 edited[idx] = e.target.value;
@@ -184,6 +185,18 @@ export const PipelineScreen = () => {
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
+                      }}
+                    />
+                    <br />
+                    <label for="name">Group</label>
+                    <input
+                      type="text"
+                      name="group"
+                      id="group"
+                      style={{ width: "50%" }}
+                      value={userGroup}
+                      onChange={(e) => {
+                        setUserGroup(e.target.value);
                       }}
                     />
                   </div>
