@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as imageStorage from "../../firebase/imageStorage";
+import * as manage from "../../firebase/manage";
 import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
 
 const styles = {
@@ -16,25 +17,25 @@ export const ConsoleScreen = () => {
   const [filterTasks, setFilterTask] = useState([]);
   const [filtered, setFilter] = useState(false); // new filter applied
   const [noFilter, setNoFilter] = useState(true); // no filter set
+  const [tasks, setTasksList] = useState([]);
 
-  //tasks must align with database
-  const tasks = [
-    {
-      key: "task1",
-      text: "task1",
-      value: "task1",
-    },
-    {
-      key: "task2",
-      text: "task2",
-      value: "task2",
-    },
-    {
-      key: "devices",
-      text: "devices",
-      value: "devices",
-    },
-  ];
+  useEffect(() => {
+    async function getTasksList() {
+      const tlist = await manage.getTasksList();
+      var tasksList = [];
+      if (tlist) {
+        tlist.forEach((t) => {
+          tasksList.push({
+            key: t,
+            text: t,
+            value: t,
+          });
+        });
+      }
+      setTasksList(tasksList);
+    }
+    getTasksList();
+  }, []);
 
   // no filter
   useEffect(() => {

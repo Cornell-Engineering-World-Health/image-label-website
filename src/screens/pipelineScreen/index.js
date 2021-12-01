@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Table } from "semantic-ui-react";
-import { doc, updateDoc, getDoc, arrayUnion, setDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebase.js";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import * as authentication from "../../firebase/authentication.js";
+import * as manage from "../../firebase/manage.js";
 
 export const PipelineScreen = () => {
   // *******************************  CREATE USER **************************************
@@ -13,18 +12,9 @@ export const PipelineScreen = () => {
       alert("Please enter a valid email address");
       return;
     }
-    // add to auth, add to userlist, add to user collection
 
-    // const auth = getAuth();
-    // createUserWithEmailAndPassword(auth, email, "ewh123")
-    //   .then((userCredential) => {
-    //     alert("Successfully created user.");
-    //   })
-    //   .catch((error) => {
-    //     const errorCode = error.code;
-    //     const errorMessage = error.message;
-    //     alert(errorCode + " " + errorMessage);
-    //   });
+    authentication.createUser(email);
+
     setEmail("");
   }
 
@@ -46,36 +36,7 @@ export const PipelineScreen = () => {
       return;
     }
 
-    const ref = doc(db, "tasks", task);
-    const docSnap = await getDoc(ref);
-
-    if (docSnap.exists()) {
-      // task exists
-      const doUpdate = window.confirm("Task already exists. Update labels?");
-      if (doUpdate) {
-        try {
-          await updateDoc(ref, {
-            labels: arrayUnion(...labels),
-          });
-        } catch (e) {
-          alert(e);
-        }
-      }
-    } else {
-      // task does not exist, create new task
-      try {
-        //add to task collection
-        await setDoc(ref, {
-          labels: labels,
-        });
-        //add to taskList
-        await updateDoc(doc(db, "lists", "taskList"), {
-          tasks: arrayUnion(task),
-        });
-      } catch (e) {
-        alert(e);
-      }
-    }
+    await manage.createTask(task, labels);
 
     // clear fields
     setLabels([""]);
@@ -131,46 +92,28 @@ export const PipelineScreen = () => {
 
   useEffect(() => {
     //gets all users and tasks in the database
-    async function getUserList() {
-      const docRef = doc(db, "lists", "userList");
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data()["users"];
-        setUsersList(data);
-      } else {
-        console.log("No such document!");
-      }
+    async function getUsersList() {
+      const ulist = await manage.getUsersList();
+      if (ulist) setUsersList(ulist);
     }
-    getUserList();
+    getUsersList();
 
-    async function getTaskList() {
-      const docRef = doc(db, "lists", "taskList");
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data()["tasks"];
-        setTasksList(data);
-      } else {
-        console.log("No such document!");
-      }
+    async function getTasksList() {
+      const tlist = await manage.getTasksList();
+      if (tlist) setTasksList(tlist);
     }
-    getTaskList();
+    getTasksList();
+
+    async function getGroupsList() {
+      const glist = await manage.getGroupsList();
+      if (glist) setGroupsList(glist);
+    }
+    getGroupsList();
   }, []);
 
-  const showUsersList = () => {
-    return usersList.map((u) => {
+  const showList = (l) => {
+    return l.map((u) => {
       return <option value={u}>{u}</option>;
-    });
-  };
-
-  const showGroupsList = () => {
-    return;
-  };
-
-  const showTasksList = () => {
-    return tasksList.map((t) => {
-      return <option value={t}>{t}</option>;
     });
   };
 
@@ -188,22 +131,33 @@ export const PipelineScreen = () => {
       return;
     }
 
-    try {
-      await updateDoc(doc(db, "users", assignToUser), {
-        currentTask: assignTask,
-        assignedTasks: arrayUnion(assignTask),
-      });
-      alert("Successfully assigned task to user!");
-    } catch (e) {
-      alert(e);
-    }
+    await manage.assignTaskToUser(assignToUser, assignTask);
 
     //change select to default
     document.getElementById("selectTask").selectedIndex = "";
     document.getElementById("selectUserOrGroup").selectedIndex = "";
   }
 
-  async function assignTaskToGroup() {}
+  async function assignTaskToGroup() {
+    const assignToGroup = document.getElementById("selectUserOrGroup").value;
+    const assignTask = document.getElementById("selectTask").value;
+    console.log(assignToGroup);
+    console.log(assignTask);
+    if (assignToGroup.length === 0) {
+      alert("Please select a group");
+      return;
+    }
+    if (assignTask.length === 0) {
+      alert("Please select a task");
+      return;
+    }
+
+    await manage.assignTaskToGroup(assignToGroup, assignTask);
+
+    //change select to default
+    document.getElementById("selectTask").selectedIndex = "";
+    document.getElementById("selectUserOrGroup").selectedIndex = "";
+  }
 
   // ******************************* TASK SUMMARY **************************************
 
@@ -336,7 +290,9 @@ export const PipelineScreen = () => {
                   </label>
                   <select id="selectUserOrGroup">
                     <option value="">- SELECT -</option>
-                    {assignByUserId ? showUsersList() : showGroupsList()}
+                    {assignByUserId
+                      ? showList(usersList)
+                      : showList(groupsList)}
                   </select>
                 </div>
                 <br />
@@ -344,7 +300,7 @@ export const PipelineScreen = () => {
                   <label for="image">Task</label>
                   <select id="selectTask">
                     <option value="">- SELECT -</option>
-                    {showTasksList()}
+                    {showList(tasksList)}
                   </select>
                 </div>
                 <br />
