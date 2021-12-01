@@ -351,7 +351,24 @@ export const ConsoleScreen = () => {
               </div>
             </section>
             <section>
-              <button title="Download">
+              <button title="Download"
+               /* 
+                get onClick={() => { ***for each image in filtered images 
+                  for image in filtered images on screen ***
+                  const xhr = new XMLHttpRequest();
+                  xhr.responseType = "blob";
+                  xhr.onload = (event) => {
+                    const blob = xhr.response;
+                    var imgURL = window.URL.createObjectURL(blob);
+                    const tempLink = document.createElement("a");
+                    tempLink.href = imgURL;
+                    const fileType = blob.type.replace("image/", "."); //.jepg, for example
+                    tempLink.setAttribute("download", imageData.url + fileType);
+                    tempLink.click();
+                  };
+                  xhr.open("GET", imageData.url);
+                  xhr.send();
+                }}*/>
                 Download
               </button></section>
 
