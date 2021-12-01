@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { signOut, onAuthStateChanged } from "firebase/auth";
 import { NavLink, Link, useHistory } from "react-router-dom";
-import { auth } from "../../firebase/firebase";
+import { auth } from "../../firebase/setup";
 
 export default function Navbar() {
   const history = useHistory();
