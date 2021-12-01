@@ -15,7 +15,7 @@ export default function Navbar() {
       setAuthenticated(true);
     } else {
       // User is signed out
-      console.log("no");
+      history.push("/");
       setAuthenticated(false);
     }
   });
