@@ -17,18 +17,25 @@ import { ref, getDownloadURL, getMetadata } from "firebase/storage";
 // An example of a valid folder prefix is 'images/task1'.
 export async function downloadImage(imagePrefix) {
   const imageRef = ref(storage, imagePrefix);
+  var rt = {};
 
   // GET [imagePrefix] URL
   await getDownloadURL(ref(storage, imagePrefix))
-    .then((url) => {
+    .then(async (url) => {
       // Get metadata properties
-      getMetadata(imageRef)
+      await getMetadata(imageRef)
         .then((fullMetadata) => {
-          return {
+          rt = {
             path: imageRef,
             url: url,
             metadata: fullMetadata.customMetadata,
           };
+          console.log(rt);
+          // return {
+          //   path: imageRef,
+          //   url: url,
+          //   metadata: fullMetadata.customMetadata,
+          // };
         })
         .catch((error) => {
           // Error getting metadata
@@ -41,6 +48,7 @@ export async function downloadImage(imagePrefix) {
       alert(error);
       console.log(error);
     });
+  return rt;
 }
 
 // Returns: a list of image metadata by task
@@ -126,7 +134,7 @@ export async function downloadImageByTasksAndUsers(tasks, users, thumbnail) {
 
 export async function downloadAllImages(thumbnail) {
   const imageRef = collection(db, "images");
-
+  console.log("hi");
   var images = [];
 
   const q = query(imageRef, orderBy("date", "desc"), limit(10));
@@ -135,7 +143,7 @@ export async function downloadAllImages(thumbnail) {
   querySnapshot.forEach(async (doc) => {
     var imagePath = doc.data().ref; // image/task/...
     if (thumbnail) imagePath = imagePath.replace("images", "thumbnails");
-
+    console.log(imagePath);
     // GET metadata of the image
     images.push(await downloadImage(imagePath));
   });

@@ -44,9 +44,11 @@ export const ConsoleScreen = () => {
     // Requires: there is at least 1 user in the collection.
     async function getAllImages() {
       const images = await imageStorage.downloadAllImages(true);
+      console.log("here", images);
       setImages(images);
     }
     if (noFilter) {
+      console.log("no filter");
       getAllImages();
     }
   }, [noFilter]);
@@ -93,7 +95,8 @@ export const ConsoleScreen = () => {
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
-    return images.map((imageData) => {
+    console.log("images", images);
+    return images.map( (imageData) => {
       return (
         <Grid.Column key={imageData.url}>
           <span class="image left">
@@ -121,8 +124,8 @@ export const ConsoleScreen = () => {
               Download Image
             </button>
             <br />
-            {imageData.metadata.date}
-            <br /> {imageData.metadata.user_id}
+            {/* {imageData.metadata.date}
+            <br /> {imageData.metadata.user_id} */}
             <br />
           </span>
         </Grid.Column>
@@ -275,9 +278,7 @@ export const ConsoleScreen = () => {
             </section>
 
             <section>
-              <Grid columns={2}>
-                {images.length > 0 && handleGetImages(images)}
-              </Grid>
+              <Grid columns={2}>{handleGetImages(images)}</Grid>
             </section>
           </div>
         </div>

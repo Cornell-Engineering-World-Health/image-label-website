@@ -17,6 +17,7 @@ export const PipelineScreen = () => {
     authentication.createUser(email, userGroup);
 
     setEmail("");
+    setUserGroup("");
   }
 
   // *******************************  CREATE TASK **************************************
@@ -335,7 +336,7 @@ export const PipelineScreen = () => {
       </section>
 
       {/* *******************************  TASK SUMMARY ************************************** */}
-      <section class="wrapper style1 align-center">
+      {/* <section class="wrapper style1 align-center">
         <div class="inner">
           <h2>Task Summary</h2>
 
@@ -407,7 +408,7 @@ export const PipelineScreen = () => {
             <br />
           </section>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };

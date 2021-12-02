@@ -52,7 +52,7 @@ export async function getUsersList() {
     const data = docSnap.data()["users"];
     return data;
   } else {
-    alert("No such document!");
+    alert("userslist error!");
     return [];
   }
 }
@@ -65,7 +65,7 @@ export async function getTasksList() {
     const data = docSnap.data()["tasks"];
     return data;
   } else {
-    alert("No such document!");
+    alert("taskslist error!");
     return [];
   }
 }
@@ -78,7 +78,7 @@ export async function getGroupsList() {
     const data = docSnap.data()["groups"];
     return data;
   } else {
-    alert("No such document!");
+    alert("groupslist error!");
     return [];
   }
 }

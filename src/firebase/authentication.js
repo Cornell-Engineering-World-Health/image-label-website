@@ -23,6 +23,7 @@ export const createUser = (email, group) => {
         currentTask: null,
         groupID: group,
         isAdmin: false,
+        assignedImages: [],
       });
 
       //add to userList
