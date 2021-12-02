@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
-import { auth } from "../../firebase/firebase";
+import { auth, db } from "../../firebase/firebase";
 import { signInWithEmailAndPassword } from "@firebase/auth";
+import { collection, getDocs, query } from "@firebase/firestore";
 import loginhero from "../../images/hololens.jpg";
 
 const styles = {
@@ -15,6 +16,19 @@ export const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
+
+  async function directUser(email) {
+    const x = await getDocs(query(collection(db, "users")))
+    x.forEach(o => {
+      if (o.data().email == email) {
+        if (o.data().isAdmin) {
+          history.push('/console')
+        } else {
+          history.push('/relabel')
+        }
+      }
+    })
+  }
 
   return (
     <div>
@@ -67,7 +81,7 @@ export const LoginScreen = () => {
                           .then((userCredential) => {
                             const user = userCredential.user;
                             setErrorMessage("");
-                            history.push("/console");
+                            directUser(email)
                           })
                           .catch((error) => {
                             if (error.code === "auth/wrong-password") {
