@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { db } from '../../firebase/firebase.js';
-import { doc, getDoc, getDocs, collection, query } from 'firebase/firestore';
-import { getStorage, ref, getDownloadURL, getMetadata } from 'firebase/storage';
-import { Dropdown, Grid, Input, Label } from 'semantic-ui-react';
+import React, { useEffect, useState } from "react";
+import * as imageStorage from "../../firebase/imageStorage";
+import * as manage from "../../firebase/manage";
+import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
 
 const styles = {
   image: {
-    width: '100%',
+    width: "100%",
   },
 };
 
@@ -18,59 +17,25 @@ export const ConsoleScreen = () => {
   const [filterTasks, setFilterTask] = useState([]);
   const [filtered, setFilter] = useState(false); // new filter applied
   const [noFilter, setNoFilter] = useState(true); // no filter set
+  const [tasks, setTasksList] = useState([]);
 
-  //tasks must align with database
-  const tasks = [
-    {
-      key: 'task1',
-      text: 'task1',
-      value: 'task1',
-    },
-    {
-      key: 'task2',
-      text: 'task2',
-      value: 'task2',
-    },
-    {
-      key: 'devices',
-      text: 'devices',
-      value: 'devices',
-    },
-  ];
-
-  // [downloadImage(url)] GETS the URL and metadata of [imagePrefix]
-  // and stores this in [images]
-  // Requires: [imagePrefix] is a valid folder prefix.
-  // An example of a valid folder prefix is 'images/task1'.
-  async function downloadImage(imagePrefix) {
-    const storage = getStorage();
-    const imageRef = ref(storage, imagePrefix);
-
-    // GET [imagePrefix] URL
-    await getDownloadURL(ref(storage, imagePrefix))
-      .then((url) => {
-        // Get metadata properties
-        getMetadata(imageRef)
-          .then((fullMetadata) => {
-            // Store the URL & metadata in [images]
-            setImages((prevArray) => [
-              ...prevArray,
-              {
-                url: url,
-                metadata: fullMetadata.customMetadata,
-              },
-            ]);
-          })
-          .catch((error) => {
-            // Error getting metadata
-            console.log(error);
+  useEffect(() => {
+    async function getTasksList() {
+      const tlist = await manage.getTasksList();
+      var tasksList = [];
+      if (tlist) {
+        tlist.forEach((t) => {
+          tasksList.push({
+            key: t,
+            text: t,
+            value: t,
           });
-      })
-      .catch((error) => {
-        // Error getting URL
-        console.log(error);
-      });
-  }
+        });
+      }
+      setTasksList(tasksList);
+    }
+    getTasksList();
+  }, []);
 
   // no filter
   useEffect(() => {
@@ -78,22 +43,12 @@ export const ConsoleScreen = () => {
     // that specific user.
     // Requires: there is at least 1 user in the collection.
     async function getAllImages() {
-      const q = query(collection(db, 'users'));
-      const querySnapshot = await getDocs(q);
-      var limit = 30; // limit to 30 images
-
-      querySnapshot.forEach(async (doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        const imagesPerUser = doc.data().images;
-        imagesPerUser.forEach((image) => {
-          // GET URL & metadata of the image
-          downloadImage(image);
-          if (limit < 0) return;
-          limit -= 1;
-        });
-      });
+      const images = await imageStorage.downloadAllImages(true);
+      console.log("here", images);
+      setImages(images);
     }
     if (noFilter) {
+      console.log("no filter");
       getAllImages();
     }
   }, [noFilter]);
@@ -107,62 +62,29 @@ export const ConsoleScreen = () => {
       async function getFilteredImages() {
         if (filterUsers.length === 0 && filterTasks.length === 0) {
           // button click guarantees emails.length>0 && tasks.length>0;
-          alert('Internal error: Empty filter.');
+          alert("Internal error: Empty filter.");
         } else if (filterUsers.length === 0) {
           // only tasks
-          filterTasks.forEach(async (t) => {
-            const docRef = doc(db, 'tasks', t);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-
-              for (const k in data) {
-                if (k.includes('@')) {
-                  //key is email
-                  data[k].forEach((image) => {
-                    downloadImage(image);
-                  });
-                }
-              }
-            } else {
-              console.log('No such task! Tried to get ' + t);
-            }
-          });
+          var taskImages = await imageStorage.downloadImageByTasks(
+            filterTasks,
+            true
+          ); // thumbnails
+          setImages(taskImages);
         } else if (filterTasks.length === 0) {
           //only user
-          filterUsers.forEach(async (user) => {
-            const docRef = doc(db, 'users', user);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-              docSnap.data().images.forEach((image) => {
-                downloadImage(image);
-              });
-            } else {
-              console.log('No such user! Tried to get ' + user);
-            }
-          });
+          var userImages = await imageStorage.downloadImageByUsers(
+            filterUsers,
+            true
+          ); // thumbnails
+          setImages(userImages);
         } else {
           // both filter
-          filterTasks.forEach(async (t) => {
-            const docRef = doc(db, 'tasks', t);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              for (const k in data) {
-                if (filterUsers.includes(k)) {
-                  //this task contains the user we're filter for
-                  data[k].forEach((image) => {
-                    downloadImage(image);
-                  });
-                }
-              }
-            } else {
-              console.log('No such task! Tried to get ' + t);
-            }
-          });
+          var images = await imageStorage.downloadImageByTasksAndUsers(
+            filterTasks,
+            filterUsers,
+            true
+          ); // thumbnails
+          setImages(images);
         }
       }
 
@@ -173,7 +95,8 @@ export const ConsoleScreen = () => {
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
-    return images.map((imageData) => {
+    console.log("images", images);
+    return images.map( (imageData) => {
       return (
         <Grid.Column key={imageData.url}>
           <span class="image left">
@@ -184,25 +107,25 @@ export const ConsoleScreen = () => {
             <button
               onClick={() => {
                 const xhr = new XMLHttpRequest();
-                xhr.responseType = 'blob';
+                xhr.responseType = "blob";
                 xhr.onload = (event) => {
                   const blob = xhr.response;
                   var imgURL = window.URL.createObjectURL(blob);
-                  const tempLink = document.createElement('a');
+                  const tempLink = document.createElement("a");
                   tempLink.href = imgURL;
-                  const fileType = blob.type.replace('image/', '.'); //.jepg, for example
-                  tempLink.setAttribute('download', imageData.url + fileType);
+                  const fileType = blob.type.replace("image/", "."); //.jepg, for example
+                  tempLink.setAttribute("download", imageData.url + fileType);
                   tempLink.click();
                 };
-                xhr.open('GET', imageData.url);
+                xhr.open("GET", imageData.url);
                 xhr.send();
               }}
             >
               Download Image
             </button>
             <br />
-            {imageData.metadata.date}
-            <br /> {imageData.metadata.user_id}
+            {/* {imageData.metadata.date}
+            <br /> {imageData.metadata.user_id} */}
             <br />
           </span>
         </Grid.Column>
@@ -218,9 +141,9 @@ export const ConsoleScreen = () => {
           <Label color="yellow">User</Label>
           <Input
             style={{
-              width: '300px',
-              marginBottom: '20px',
-              marginRight: '80px',
+              width: "300px",
+              marginBottom: "20px",
+              marginRight: "80px",
             }}
             onChange={(e) => {
               var changed = [...filterUsers];
@@ -261,9 +184,9 @@ export const ConsoleScreen = () => {
             selection
             options={tasks}
             style={{
-              width: '300px',
-              marginBottom: '20px',
-              marginRight: '80px',
+              width: "300px",
+              marginBottom: "20px",
+              marginRight: "80px",
             }}
             onChange={(e, d) => {
               var changed = [...filterTasks];
@@ -310,14 +233,14 @@ export const ConsoleScreen = () => {
                     <Dropdown.Divider />
                     <Dropdown.Item
                       onClick={() => {
-                        setFilterUser([...filterUsers, '']);
+                        setFilterUser([...filterUsers, ""]);
                       }}
                     >
                       User Email
                     </Dropdown.Item>
                     <Dropdown.Item
                       onClick={() => {
-                        setFilterTask([...filterTasks, '']);
+                        setFilterTask([...filterTasks, ""]);
                       }}
                     >
                       Task
@@ -333,10 +256,10 @@ export const ConsoleScreen = () => {
                   <button
                     onClick={() => {
                       if (
-                        filterUsers.includes('') ||
-                        filterTasks.includes('')
+                        filterUsers.includes("") ||
+                        filterTasks.includes("")
                       ) {
-                        alert('Error: Empty filter value(s)!');
+                        alert("Error: Empty filter value(s)!");
                       } else {
                         setFilter(true); // new filter applied
                         setNoFilter(false);
@@ -355,9 +278,7 @@ export const ConsoleScreen = () => {
             </section>
 
             <section>
-              <Grid columns={2}>
-                {images.length > 0 && handleGetImages(images)}
-              </Grid>
+              <Grid columns={2}>{handleGetImages(images)}</Grid>
             </section>
           </div>
         </div>

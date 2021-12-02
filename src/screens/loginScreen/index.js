@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
-import { auth } from "../../firebase/firebase";
+import { auth } from "../../firebase/setup";
 import { signInWithEmailAndPassword } from "@firebase/auth";
 import loginhero from "../../images/hololens.jpg";
 
 const styles = {
   error: {
     color: "red",
-  }
-}
+  },
+};
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -20,11 +20,12 @@ export const LoginScreen = () => {
     <div>
       {/* Wrapper */}
       <div id="wrapper" class="divided">
-
         <section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
           <div class="content">
             <h1>Auro Image</h1>
-            <p class="major">Please enter your user name and password to log in</p>
+            <p class="major">
+              Please enter your user name and password to log in
+            </p>
 
             <form method="post" action="#">
               <div class="fields">
@@ -50,7 +51,7 @@ export const LoginScreen = () => {
                 </div>
               </div>
               <p style={styles.error}>{errorMessage}</p>
-              <ul class="actions special" >
+              <ul class="actions special">
                 <li>
                   <input
                     type="submit"
@@ -71,21 +72,28 @@ export const LoginScreen = () => {
                           })
                           .catch((error) => {
                             if (error.code === "auth/wrong-password") {
-                              setErrorMessage("Wrong password. Please try again.");
+                              setErrorMessage(
+                                "Wrong password. Please try again."
+                              );
                             } else if (error.code === "auth/user-not-found") {
                               setErrorMessage("Username not found.");
                             } else {
-                              setErrorMessage("Login failed. Please try again at a later time.")
+                              setErrorMessage(
+                                "Login failed. Please try again at a later time."
+                              );
                             }
                             console.log(error.code);
                             //console.log(error.message)
-                          })
+                          });
                       }
                     }}
                   />
                 </li>
               </ul>
-              <p> No account? <NavLink to={"/console"}>Sign up</NavLink></p>
+              <p>
+                {" "}
+                No account? <NavLink to={"/console"}>Sign up</NavLink>
+              </p>
             </form>
           </div>
 
