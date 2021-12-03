@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { AboutScreen } from "../screens/aboutScreen";
 import { ConsoleScreen } from "../screens/consoleScreen";
 import { DashboardScreen } from "../screens/dashboardScreen";
-import { ImageMapScreen } from "../screens/imageMapScreen";
+import { BugReportScreen } from "../screens/bugReportScreen";
 import { LoginScreen } from "../screens/loginScreen";
 import { SignUpScreen } from "../screens/signUpScreen";
 import { PipelineScreen } from "../screens/pipelineScreen";
@@ -28,7 +28,7 @@ function Routes(props) {
             <Route path={"/dashboard"} component={DashboardScreen} />
             <Route path={"/about"} component={AboutScreen} />
             <Route path={"/console"} component={ConsoleScreen} />
-            <Route path={"/imagemap"} component={ImageMapScreen} />
+            <Route path={"/bugreport"} component={BugReportScreen} />
             <Route path={"/pipeline"} component={PipelineScreen} />
             <Route path={"/relabel"} component={RelabelScreen} />
           </Switch>
