@@ -47,6 +47,7 @@ export const ConsoleScreen = () => {
       setImages(images);
     }
     if (noFilter) {
+      console.log("no filter");
       getAllImages();
     }
   }, [noFilter]);
