@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as imageStorage from "../../firebase/imageStorage";
 import * as manage from "../../firebase/manage";
-import { Dropdown, Grid, Input, Label } from "semantic-ui-react";
+import { Dropdown, Grid, Input, Label, Icon } from "semantic-ui-react";
 
 const styles = {
   image: {
@@ -44,11 +44,9 @@ export const ConsoleScreen = () => {
     // Requires: there is at least 1 user in the collection.
     async function getAllImages() {
       const images = await imageStorage.downloadAllImages(true);
-      console.log("here", images);
       setImages(images);
     }
     if (noFilter) {
-      console.log("no filter");
       getAllImages();
     }
   }, [noFilter]);
@@ -95,40 +93,40 @@ export const ConsoleScreen = () => {
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
-    console.log("images", images);
     return images.map((imageData) => {
-      return (
+      return imageData ? (
         <Grid.Column key={imageData.url}>
           <span class="image left">
-            <img src={imageData.url} style={styles.image} alt="" />
+            <img
+              src={imageData.url}
+              style={styles.image}
+              alt={imageData.path}
+            />
           </span>
           <br />
-          <span>
-            <button
-              onClick={() => {
-                const xhr = new XMLHttpRequest();
-                xhr.responseType = "blob";
-                xhr.onload = (event) => {
-                  const blob = xhr.response;
-                  var imgURL = window.URL.createObjectURL(blob);
-                  const tempLink = document.createElement("a");
-                  tempLink.href = imgURL;
-                  const fileType = blob.type.replace("image/", "."); //.jepg, for example
-                  tempLink.setAttribute("download", imageData.url + fileType);
-                  tempLink.click();
-                };
-                xhr.open("GET", imageData.url);
-                xhr.send();
-              }}
-            >
-              Download Image
-            </button>
-            <br />
-            {/* {imageData.metadata.date}
-            <br /> {imageData.metadata.user_id} */}
-            <br />
-          </span>
+          <Label
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              const xhr = new XMLHttpRequest();
+              xhr.responseType = "blob";
+              xhr.onload = (event) => {
+                const blob = xhr.response;
+                var imgURL = window.URL.createObjectURL(blob);
+                const tempLink = document.createElement("a");
+                tempLink.href = imgURL;
+                const fileType = blob.type.replace("image/", "."); //.jepg, for example
+                tempLink.setAttribute("download", imageData.path + fileType);
+                tempLink.click();
+              };
+              xhr.open("GET", imageData.url);
+              xhr.send();
+            }}
+          >
+            Download
+          </Label>
         </Grid.Column>
+      ) : (
+        <></>
       );
     });
   };
@@ -274,11 +272,11 @@ export const ConsoleScreen = () => {
               </div>
             </section>
             <section>
-              <button title="Download">Download</button>
+              <button title="Download">Download All</button>
             </section>
 
             <section>
-              <Grid columns={2}>{handleGetImages(images)}</Grid>
+              <Grid columns={4}>{handleGetImages(images)}</Grid>
             </section>
           </div>
         </div>
