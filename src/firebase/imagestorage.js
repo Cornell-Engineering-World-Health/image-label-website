@@ -15,39 +15,52 @@ import { ref, getDownloadURL, getMetadata } from "firebase/storage";
 // and returns the data
 // Requires: [imagePrefix] is a valid folder prefix.
 // An example of a valid folder prefix is 'images/task1'.
+// export async function downloadImage(imagePrefix) {
+//   const imageRef = ref(storage, imagePrefix);
+//   var rt = {};
+
+//   // GET [imagePrefix] URL
+//   getDownloadURL(imageRef)
+//     .then((url) => {
+//       // Get metadata properties
+//       getMetadata(imageRef)
+//         .then((fullMetadata) => {
+//           rt = {
+//             path: imagePrefix,
+//             url: url,
+//             metadata: fullMetadata.customMetadata,
+//           };
+//           console.log(rt);
+//           return rt;
+//         })
+//         .catch((error) => {
+//           // Error getting metadata
+//           alert(error);
+//           console.log(error);
+//         });
+//       // return rt;
+//     })
+//     .catch((error) => {
+//       // Error getting URL
+//       alert(error);
+//       console.log(error);
+//     });
+//   // console.log(rt);
+//   // return rt;
+// }
+
 export async function downloadImage(imagePrefix) {
   const imageRef = ref(storage, imagePrefix);
   var rt = {};
 
   // GET [imagePrefix] URL
-  await getDownloadURL(ref(storage, imagePrefix))
-    .then(async (url) => {
-      // Get metadata properties
-      await getMetadata(imageRef)
-        .then((fullMetadata) => {
-          rt = {
-            path: imageRef,
-            url: url,
-            metadata: fullMetadata.customMetadata,
-          };
-          console.log(rt);
-          // return {
-          //   path: imageRef,
-          //   url: url,
-          //   metadata: fullMetadata.customMetadata,
-          // };
-        })
-        .catch((error) => {
-          // Error getting metadata
-          alert(error);
-          console.log(error);
-        });
-    })
-    .catch((error) => {
-      // Error getting URL
-      alert(error);
-      console.log(error);
-    });
+  const url = await getDownloadURL(imageRef);
+  const fullMetadata = await getMetadata(imageRef);
+  rt = {
+    path: imagePrefix,
+    url: url,
+    metadata: fullMetadata.customMetadata,
+  };
   return rt;
 }
 
@@ -134,19 +147,29 @@ export async function downloadImageByTasksAndUsers(tasks, users, thumbnail) {
 
 export async function downloadAllImages(thumbnail) {
   const imageRef = collection(db, "images");
-  console.log("hi");
-  var images = [];
 
   const q = query(imageRef, orderBy("date", "desc"), limit(10));
   const querySnapshot = await getDocs(q);
 
-  querySnapshot.forEach(async (doc) => {
+  // Map querySnapshot to array of async functions (Promises)
+  const imageRequests = querySnapshot.docs.map(async (doc) => {
     var imagePath = doc.data().ref; // image/task/...
     if (thumbnail) imagePath = imagePath.replace("images", "thumbnails");
-    console.log(imagePath);
     // GET metadata of the image
-    images.push(await downloadImage(imagePath));
+    const imageRef = ref(storage, imagePath);
+
+    // GET [imagePrefix] URL
+    const url = await getDownloadURL(imageRef);
+    const fullMetadata = await getMetadata(imageRef);
+
+    // Return image objects
+    return {
+      path: imagePath,
+      url: url,
+      metadata: fullMetadata.customMetadata,
+    };
   });
 
-  return images;
+  // Return array of resolved promises (i.e. the image objects)
+  return Promise.all(imageRequests);
 }

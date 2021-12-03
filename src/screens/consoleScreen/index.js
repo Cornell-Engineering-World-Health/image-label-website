@@ -96,7 +96,7 @@ export const ConsoleScreen = () => {
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
     console.log("images", images);
-    return images.map( (imageData) => {
+    return images.map((imageData) => {
       return (
         <Grid.Column key={imageData.url}>
           <span class="image left">
