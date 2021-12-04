@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { auth, signIn } from "../../firebase/firebase";
+import { auth, signIn } from "../../firebase/setup";
 import { signInWithEmailAndPassword } from "@firebase/auth";
 import loginhero from "../../images/hololens.jpg";
-
 
 const styles = {
   error: {
     color: "red",
-  }
-}
+  },
+};
 
 export const SignUpScreen = () => {
   const [email, setEmail] = useState("");
@@ -22,11 +21,12 @@ export const SignUpScreen = () => {
     <div>
       {/* Wrapper */}
       <div id="wrapper" class="divided">
-
         <section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
           <div class="content">
             <h1>Sign Up</h1>
-            <p class="major">Please enter a username and password to sign up.</p>
+            <p class="major">
+              Please enter a username and password to sign up.
+            </p>
 
             <form method="post" action="#">
               <div class="fields">
@@ -52,7 +52,7 @@ export const SignUpScreen = () => {
                 </div>
               </div>
               <p style={styles.error}>{errorMessage}</p>
-              <ul class="actions special" >
+              <ul class="actions special">
                 <li>
                   <input
                     type="submit"
@@ -73,15 +73,19 @@ export const SignUpScreen = () => {
                           })
                           .catch((error) => {
                             if (error.code === "auth/wrong-password") {
-                              setErrorMessage("Wrong password. Please try again.");
+                              setErrorMessage(
+                                "Wrong password. Please try again."
+                              );
                             } else if (error.code === "auth/user-not-found") {
                               setErrorMessage("Username not found.");
                             } else {
-                              setErrorMessage("Login failed. Please try again at a later time.")
+                              setErrorMessage(
+                                "Login failed. Please try again at a later time."
+                              );
                             }
                             console.log(error.code);
                             //console.log(error.message)
-                          })
+                          });
                       }
                     }}
                   />

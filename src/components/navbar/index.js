@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-import { signOut, onAuthStateChanged } from "firebase/auth";
-import { NavLink, Link, useHistory } from "react-router-dom";
-import { auth, db } from "../../firebase/firebase";
-import { doc, where, collection, query, getDocs } from "@firebase/firestore";
-import { useEffect } from "react/cjs/react.development";
+import React, { useState, useEffect } from 'react';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { NavLink, Link, useHistory } from 'react-router-dom';
+import { auth } from '../../firebase/setup';
 
 export default function Navbar() {
   const history = useHistory();
@@ -18,7 +16,7 @@ export default function Navbar() {
       setAuthenticated(true);
     } else {
       // User is signed out
-      console.log("no");
+      history.push('/');
       setAuthenticated(false);
     }
   });
@@ -35,10 +33,9 @@ export default function Navbar() {
   if (adminOrNot) {
     return authenticated ? (
       <nav class="banner wrapper sty align-center">
-        {/* <NavLink to="/dashboard">Dashboard |</NavLink> */}
         <NavLink to="/console"> Admin Console |</NavLink>
         <NavLink to="/relabel"> Relabel |</NavLink>
-        <NavLink to="/imagemap"> Image Map |</NavLink>
+        <NavLink to="/bugreports"> Bug Reports |</NavLink>
         <NavLink to="/pipeline"> Task Pipeline |</NavLink>
         <Link
           onClick={(e) => {
@@ -88,5 +85,5 @@ export default function Navbar() {
       </nav>
     );
 
-  }
+  }  
 }
