@@ -13,7 +13,7 @@ export default function Navbar() {
     if (user) {
       // User is signed in, see docs for a list of available properties
       // https://firebase.google.com/docs/reference/js/firebase.User
-      console.log(user);
+      determineAdmin(user.auth.currentUser.email)
       setAuthenticated(true);
     } else {
       // User is signed out
@@ -22,10 +22,13 @@ export default function Navbar() {
     }
   });
 
+  async function determineAdmin(email) {
+    const user = await getUser(email)
+    setAdminOrNot(user.isAdmin)
+  }
   useEffect(async () => {
-    if (auth.currentUser) {
-      const user = await getUser(auth.currentUser.email);
-      setAdminOrNot(user.isAdmin);
+    if (authenticated) {
+      determineAdmin(auth.currentUser.email)
     }
   }, []);
   if (adminOrNot) {
