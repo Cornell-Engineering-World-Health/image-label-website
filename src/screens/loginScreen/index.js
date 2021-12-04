@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavLink, useHistory } from "react-router-dom";
 import { auth } from "../../firebase/setup";
 import { signInWithEmailAndPassword } from "@firebase/auth";
+import { collection, getDocs, query } from "@firebase/firestore";
 import loginhero from "../../images/hololens.jpg";
 
 const styles = {
@@ -16,9 +17,21 @@ export const LoginScreen = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const history = useHistory();
 
+  async function directUser(email) {
+    const x = await getDocs(query(collection(db, "users")))
+    x.forEach(o => {
+      if (o.data().email == email) {
+        if (o.data().isAdmin) {
+          history.push('/console')
+        } else {
+          history.push('/relabel')
+        }
+      }
+    })
+  }
+
   return (
     <div>
-      {/* Wrapper */}
       <div id="wrapper" class="divided">
         <section class="banner style1 orient-left content-align-left image-position-right fullscreen onload-image-fade-in onload-content-fade-right">
           <div class="content">
@@ -68,7 +81,7 @@ export const LoginScreen = () => {
                           .then((userCredential) => {
                             const user = userCredential.user;
                             setErrorMessage("");
-                            history.push("/console");
+                            directUser(email)
                           })
                           .catch((error) => {
                             if (error.code === "auth/wrong-password") {
@@ -83,7 +96,6 @@ export const LoginScreen = () => {
                               );
                             }
                             console.log(error.code);
-                            //console.log(error.message)
                           });
                       }
                     }}
@@ -91,7 +103,6 @@ export const LoginScreen = () => {
                 </li>
               </ul>
               <p>
-                {" "}
                 No account? <NavLink to={"/console"}>Sign up</NavLink>
               </p>
             </form>
