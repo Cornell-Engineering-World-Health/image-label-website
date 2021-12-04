@@ -1,19 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { NavLink, Link, useHistory } from 'react-router-dom';
 import { auth } from '../../firebase/setup';
-import { getUser } from '../../firebase/manage';
 
 export default function Navbar() {
   const history = useHistory();
   const [authenticated, setAuthenticated] = useState(false);
-  const [adminOrNot, setAdminOrNot] = useState(false);
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
       // User is signed in, see docs for a list of available properties
       // https://firebase.google.com/docs/reference/js/firebase.User
-      determineAdmin(user.auth.currentUser.email)
       setAuthenticated(true);
     } else {
       // User is signed out
@@ -22,16 +19,7 @@ export default function Navbar() {
     }
   });
 
-  async function determineAdmin(email) {
-    const user = await getUser(email)
-    setAdminOrNot(user.isAdmin)
-  }
-  useEffect(async () => {
-    if (authenticated) {
-      determineAdmin(auth.currentUser.email)
-    }
-  }, []);
-  if (adminOrNot) {
+  if (sessionStorage.getItem("isAdmin") == "true") {
     return authenticated ? (
       <nav class="banner wrapper sty align-center">
         <NavLink to="/console"> Admin Console |</NavLink>
@@ -43,6 +31,7 @@ export default function Navbar() {
             e.preventDefault();
             signOut(auth)
               .then(() => {
+                sessionStorage.clear()
                 history.push('/');
               })
               .catch((error) => {

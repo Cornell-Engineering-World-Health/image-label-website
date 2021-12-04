@@ -19,9 +19,13 @@ export const LoginScreen = () => {
 
   async function directUser(email) {
     const user = await getUser(email);
+    sessionStorage.clear()
     if (user.isAdmin) {
+      sessionStorage.setItem("isAdmin", "true");
       history.push('/console');
+      window.location.reload()
     } else {
+      sessionStorage.setItem("isAdmin", "false");
       history.push('/relabel');
     }
   }
