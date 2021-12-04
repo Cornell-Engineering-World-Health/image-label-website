@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { signOut, onAuthStateChanged } from "firebase/auth";
-import { NavLink, Link, useHistory } from "react-router-dom";
-import { auth } from "../../firebase/setup";
+import React, { useState } from 'react';
+import { signOut, onAuthStateChanged } from 'firebase/auth';
+import { NavLink, Link, useHistory } from 'react-router-dom';
+import { auth } from '../../firebase/setup';
 
 export default function Navbar() {
   const history = useHistory();
@@ -15,14 +15,13 @@ export default function Navbar() {
       setAuthenticated(true);
     } else {
       // User is signed out
-      history.push("/");
+      history.push('/');
       setAuthenticated(false);
     }
   });
 
   return authenticated ? (
     <nav class="banner wrapper sty align-center">
-      {/* <NavLink to="/dashboard">Dashboard |</NavLink> */}
       <NavLink to="/console"> Admin Console |</NavLink>
       <NavLink to="/relabel"> Relabel |</NavLink>
       <NavLink to="/bugreports"> Bug Reports |</NavLink>
@@ -32,7 +31,7 @@ export default function Navbar() {
           e.preventDefault();
           signOut(auth)
             .then(() => {
-              history.push("/");
+              history.push('/');
             })
             .catch((error) => {
               console.log(error);
