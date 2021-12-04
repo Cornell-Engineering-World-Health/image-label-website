@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { NavLink, Link, useHistory } from 'react-router-dom';
 import { auth } from '../../firebase/setup';
+import { getUser } from '../../firebase/manage';
 
 export default function Navbar() {
   const history = useHistory();
   const [authenticated, setAuthenticated] = useState(false);
-  const [adminOrNot, setAdminOrNot] = useState(false)
+  const [adminOrNot, setAdminOrNot] = useState(false);
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -22,14 +23,11 @@ export default function Navbar() {
   });
 
   useEffect(async () => {
-    const x = await getDocs(collection(db, "users"))
-    x.forEach(o => {
-      if (o.data().email == auth.currentUser.email) {
-        setAdminOrNot(o.data().isAdmin)
-      }
-    })
-    //setUser(getDocs(query(collection(db, "users"), where('email', '==', auth.currentUser.email))))
-  }, [])
+    if (auth.currentUser) {
+      const user = await getUser(auth.currentUser.email);
+      setAdminOrNot(user.isAdmin);
+    }
+  }, []);
   if (adminOrNot) {
     return authenticated ? (
       <nav class="banner wrapper sty align-center">
@@ -42,7 +40,7 @@ export default function Navbar() {
             e.preventDefault();
             signOut(auth)
               .then(() => {
-                history.push("/");
+                history.push('/');
               })
               .catch((error) => {
                 console.log(error);
@@ -61,14 +59,13 @@ export default function Navbar() {
   } else {
     return authenticated ? (
       <nav class="banner wrapper sty align-center">
-        {/* <NavLink to="/dashboard">Dashboard |</NavLink> */}
         <NavLink to="/relabel"> Relabel |</NavLink>
         <Link
           onClick={(e) => {
             e.preventDefault();
             signOut(auth)
               .then(() => {
-                history.push("/");
+                history.push('/');
               })
               .catch((error) => {
                 console.log(error);
@@ -84,6 +81,5 @@ export default function Navbar() {
         <NavLink to="/about"> ABOUT |</NavLink>
       </nav>
     );
-
-  }  
+  }
 }

@@ -138,3 +138,15 @@ export async function getBugReports() {
     return [];
   }
 }
+
+export async function getUser(email) {
+  try {
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('email', '==', email));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs[0].data();
+  } catch (e) {
+    alert(e);
+    return {};
+  }
+}
