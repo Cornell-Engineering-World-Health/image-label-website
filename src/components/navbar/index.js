@@ -19,6 +19,7 @@ export default function Navbar() {
     }
   });
 
+
   if (sessionStorage.getItem("isAdmin") == "true") {
     return authenticated ? (
       <nav class="banner wrapper sty align-center">
