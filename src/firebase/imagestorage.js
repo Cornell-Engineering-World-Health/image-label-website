@@ -25,11 +25,20 @@ export async function downloadImage(imagePrefix) {
 }
 
 // Returns: a list of image metadata by task
-export async function downloadImageByTasks(tasks, thumbnail) {
+export async function downloadImageByTasks(time, tasks, thumbnail) {
   const imageRef = collection(db, 'images');
 
   const taskRequests = tasks.map(async (t) => {
-    const q = query(imageRef, where('task', '==', t), orderBy('date', 'desc'));
+    const q = query(
+      imageRef,
+      where('task', '==', t),
+      where(
+        'date',
+        '>=',
+        time === 0 ? new Date(0) : new Date(Date.now() - time)
+      ),
+      orderBy('date', 'desc')
+    );
 
     const querySnapshot = await getDocs(q);
 
@@ -51,13 +60,18 @@ export async function downloadImageByTasks(tasks, thumbnail) {
 }
 
 // Returns: a list of image metadata by user
-export async function downloadImageByUsers(users, thumbnail) {
+export async function downloadImageByUsers(time, users, thumbnail) {
   const imageRef = collection(db, 'images');
 
   const usersRequests = users.map(async (email) => {
     const q = query(
       imageRef,
       where('email', '==', email),
+      where(
+        'date',
+        '>=',
+        time === 0 ? new Date(0) : new Date(Date.now() - time)
+      ),
       orderBy('date', 'desc')
     );
 
@@ -78,7 +92,12 @@ export async function downloadImageByUsers(users, thumbnail) {
 }
 
 // Returns: a list of image metadata by user & task
-export async function downloadImageByTasksAndUsers(tasks, users, thumbnail) {
+export async function downloadImageByTasksAndUsers(
+  time,
+  tasks,
+  users,
+  thumbnail
+) {
   const imageRef = collection(db, 'images');
 
   // var images = [];
@@ -88,6 +107,11 @@ export async function downloadImageByTasksAndUsers(tasks, users, thumbnail) {
     const q = query(
       imageRef,
       where('email', '==', email),
+      where(
+        'date',
+        '>=',
+        time === 0 ? new Date(0) : new Date(Date.now() - time)
+      ),
       orderBy('date', 'desc')
     );
 
@@ -109,10 +133,16 @@ export async function downloadImageByTasksAndUsers(tasks, users, thumbnail) {
   return (await Promise.all(usersRequests)).flat();
 }
 
-export async function downloadAllImages(thumbnail) {
+export async function downloadAllImages(time, thumbnail) {
   const imageRef = collection(db, 'images');
 
-  const q = query(imageRef, orderBy('date', 'desc'), limit(10));
+  const q = query(
+    imageRef,
+    orderBy('date', 'desc'),
+    where('date', '>=', time === 0 ? new Date(0) : new Date(Date.now() - time)),
+    limit(10)
+  );
+
   const querySnapshot = await getDocs(q);
 
   // Map querySnapshot to array of async functions (Promises) [forEach is synchronous!]

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import * as imageStorage from '../../firebase/imagestorage';
+import * as imageStorage from '../../firebase/imageStorage.js';
 import * as manage from '../../firebase/manage';
-import { Dropdown, Grid, Input, Label } from 'semantic-ui-react';
+import { Dropdown, Grid, Input, Label, Icon } from 'semantic-ui-react';
 
 const styles = {
   image: {
@@ -18,6 +18,8 @@ export const ConsoleScreen = () => {
   const [filtered, setFilter] = useState(false); // new filter applied
   const [noFilter, setNoFilter] = useState(true); // no filter set
   const [tasks, setTasksList] = useState([]);
+  const [time, setTime] = useState(0);
+  const [timeText, setTimeText] = useState('All times');
 
   useEffect(() => {
     async function getTasksList() {
@@ -43,14 +45,13 @@ export const ConsoleScreen = () => {
     // that specific user.
     // Requires: there is at least 1 user in the collection.
     async function getAllImages() {
-      const images = await imageStorage.downloadAllImages(true);
+      const images = await imageStorage.downloadAllImages(time, true);
       setImages(images);
     }
     if (noFilter) {
-      console.log('no filter');
       getAllImages();
     }
-  }, [noFilter]);
+  }, [noFilter, time]);
 
   //filtering
   useEffect(() => {
@@ -65,6 +66,7 @@ export const ConsoleScreen = () => {
         } else if (filterUsers.length === 0) {
           // only tasks
           var taskImages = await imageStorage.downloadImageByTasks(
+            time,
             filterTasks,
             true
           ); // thumbnails
@@ -72,6 +74,7 @@ export const ConsoleScreen = () => {
         } else if (filterTasks.length === 0) {
           //only user
           var userImages = await imageStorage.downloadImageByUsers(
+            time,
             filterUsers,
             true
           ); // thumbnails
@@ -79,6 +82,7 @@ export const ConsoleScreen = () => {
         } else {
           // both filter
           var images = await imageStorage.downloadImageByTasksAndUsers(
+            time,
             filterTasks,
             filterUsers,
             true
@@ -90,7 +94,7 @@ export const ConsoleScreen = () => {
       getFilteredImages();
       setFilter(false);
     }
-  }, [filtered, filterUsers, filterTasks]);
+  }, [filtered, filterUsers, filterTasks, time]);
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
@@ -224,6 +228,50 @@ export const ConsoleScreen = () => {
             filter and download the image data by click (graphical Interface).
           </p>
           <div class="index align-left">
+            <section>
+              {' '}
+              <div>
+                <Label color="green">Time</Label>
+                <Dropdown
+                  placeholder={timeText}
+                  search
+                  selection
+                  options={[
+                    {
+                      key: 'All times',
+                      text: 'All times',
+                      value: 0,
+                    },
+                    {
+                      key: 'Last 30 days',
+                      text: 'Last 30 days',
+                      value: 2592000000,
+                    },
+                    {
+                      key: 'Last week',
+                      text: 'Last week',
+                      value: 604800000,
+                    },
+                    {
+                      key: 'Last 24 hours',
+                      text: 'Last 24 hours',
+                      value: 86400000,
+                    },
+                  ]}
+                  style={{
+                    width: '300px',
+                    marginBottom: '20px',
+                    marginRight: '80px',
+                  }}
+                  onChange={(e, d) => {
+                    setTime(d.value);
+                    setTimeText(d.text);
+                  }}
+                  value={timeText}
+                />
+              </div>
+              <br />
+            </section>
             <section>
               <div>
                 <Dropdown text="+ Add Filter" floating>
