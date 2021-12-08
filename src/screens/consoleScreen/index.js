@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import * as imageStorage from '../../firebase/imageStorage';
+import * as imageStorage from '../../firebase/imagestorage';
 import * as manage from '../../firebase/manage';
 import { Dropdown, Grid, Input, Label } from 'semantic-ui-react';
 
