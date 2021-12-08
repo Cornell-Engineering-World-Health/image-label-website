@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import * as imageStorage from "../../firebase/imageStorage";
-import * as manage from "../../firebase/manage";
-import { Dropdown, Grid, Input, Label, Icon } from "semantic-ui-react";
+import React, { useEffect, useState } from 'react';
+import * as imageStorage from '../../firebase/imageStorage.js';
+import * as manage from '../../firebase/manage';
+import { Dropdown, Grid, Input, Label, Icon } from 'semantic-ui-react';
 
 const styles = {
   image: {
-    width: "100%",
+    width: '100%',
   },
 };
 
@@ -19,7 +19,7 @@ export const ConsoleScreen = () => {
   const [noFilter, setNoFilter] = useState(true); // no filter set
   const [tasks, setTasksList] = useState([]);
   const [time, setTime] = useState(0);
-  const [timeText, setTimeText] = useState("All times");
+  const [timeText, setTimeText] = useState('All times');
 
   useEffect(() => {
     async function getTasksList() {
@@ -62,7 +62,7 @@ export const ConsoleScreen = () => {
       async function getFilteredImages() {
         if (filterUsers.length === 0 && filterTasks.length === 0) {
           // button click guarantees emails.length>0 && tasks.length>0;
-          alert("Internal error: Empty filter.");
+          alert('Internal error: Empty filter.');
         } else if (filterUsers.length === 0) {
           // only tasks
           var taskImages = await imageStorage.downloadImageByTasks(
@@ -110,20 +110,20 @@ export const ConsoleScreen = () => {
           </span>
           <br />
           <Label
-            style={{ cursor: "pointer" }}
+            style={{ cursor: 'pointer' }}
             onClick={() => {
               const xhr = new XMLHttpRequest();
-              xhr.responseType = "blob";
+              xhr.responseType = 'blob';
               xhr.onload = (event) => {
                 const blob = xhr.response;
                 var imgURL = window.URL.createObjectURL(blob);
-                const tempLink = document.createElement("a");
+                const tempLink = document.createElement('a');
                 tempLink.href = imgURL;
-                const fileType = blob.type.replace("image/", "."); //.jepg, for example
-                tempLink.setAttribute("download", imageData.path + fileType);
+                const fileType = blob.type.replace('image/', '.'); //.jepg, for example
+                tempLink.setAttribute('download', imageData.path + fileType);
                 tempLink.click();
               };
-              xhr.open("GET", imageData.url);
+              xhr.open('GET', imageData.url);
               xhr.send();
             }}
           >
@@ -144,9 +144,9 @@ export const ConsoleScreen = () => {
           <Label color="yellow">User</Label>
           <Input
             style={{
-              width: "300px",
-              marginBottom: "20px",
-              marginRight: "80px",
+              width: '300px',
+              marginBottom: '20px',
+              marginRight: '80px',
             }}
             onChange={(e) => {
               var changed = [...filterUsers];
@@ -187,9 +187,9 @@ export const ConsoleScreen = () => {
             selection
             options={tasks}
             style={{
-              width: "300px",
-              marginBottom: "20px",
-              marginRight: "80px",
+              width: '300px',
+              marginBottom: '20px',
+              marginRight: '80px',
             }}
             onChange={(e, d) => {
               var changed = [...filterTasks];
@@ -229,7 +229,7 @@ export const ConsoleScreen = () => {
           </p>
           <div class="index align-left">
             <section>
-              {" "}
+              {' '}
               <div>
                 <Label color="green">Time</Label>
                 <Dropdown
@@ -238,30 +238,30 @@ export const ConsoleScreen = () => {
                   selection
                   options={[
                     {
-                      key: "All times",
-                      text: "All times",
+                      key: 'All times',
+                      text: 'All times',
                       value: 0,
                     },
                     {
-                      key: "Last 30 days",
-                      text: "Last 30 days",
+                      key: 'Last 30 days',
+                      text: 'Last 30 days',
                       value: 2592000000,
                     },
                     {
-                      key: "Last week",
-                      text: "Last week",
+                      key: 'Last week',
+                      text: 'Last week',
                       value: 604800000,
                     },
                     {
-                      key: "Last 24 hours",
-                      text: "Last 24 hours",
+                      key: 'Last 24 hours',
+                      text: 'Last 24 hours',
                       value: 86400000,
                     },
                   ]}
                   style={{
-                    width: "300px",
-                    marginBottom: "20px",
-                    marginRight: "80px",
+                    width: '300px',
+                    marginBottom: '20px',
+                    marginRight: '80px',
                   }}
                   onChange={(e, d) => {
                     setTime(d.value);
@@ -280,14 +280,14 @@ export const ConsoleScreen = () => {
                     <Dropdown.Divider />
                     <Dropdown.Item
                       onClick={() => {
-                        setFilterUser([...filterUsers, ""]);
+                        setFilterUser([...filterUsers, '']);
                       }}
                     >
                       User Email
                     </Dropdown.Item>
                     <Dropdown.Item
                       onClick={() => {
-                        setFilterTask([...filterTasks, ""]);
+                        setFilterTask([...filterTasks, '']);
                       }}
                     >
                       Task
@@ -303,10 +303,10 @@ export const ConsoleScreen = () => {
                   <button
                     onClick={() => {
                       if (
-                        filterUsers.includes("") ||
-                        filterTasks.includes("")
+                        filterUsers.includes('') ||
+                        filterTasks.includes('')
                       ) {
-                        alert("Error: Empty filter value(s)!");
+                        alert('Error: Empty filter value(s)!');
                       } else {
                         setFilter(true); // new filter applied
                         setNoFilter(false);
