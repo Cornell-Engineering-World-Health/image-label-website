@@ -1,4 +1,4 @@
-import { db } from './setup';
+import { db } from "./setup";
 import {
   doc,
   updateDoc,
@@ -9,84 +9,94 @@ import {
   collection,
   query,
   where,
-} from 'firebase/firestore';
+} from "firebase/firestore";
 
 export async function createTask(task, labels) {
-  const ref = doc(db, 'tasks', task);
-  const docSnap = await getDoc(ref);
+  try {
+    const tasksRef = collection(db, "tasks");
+    const q = query(tasksRef, where("task", "==", task));
 
-  if (docSnap.exists()) {
-    // task exists
-    const doUpdate = window.confirm('Task already exists. Update labels?');
-    if (doUpdate) {
+    const querySnapshot = await getDocs(q);
+    const docs = querySnapshot.docs;
+    if (docs.length > 0) {
+      // task already exists
+      const docRef = docs[0].ref;
+      const doUpdate = window.confirm("Task already exists. Update labels?");
+      if (doUpdate) {
+        try {
+          await updateDoc(docRef, {
+            labels: arrayUnion(...labels),
+          });
+        } catch (e) {
+          alert(e);
+        }
+      }
+    } else {
+      // task does not exist, create new task
       try {
-        await updateDoc(ref, {
-          labels: arrayUnion(...labels),
+        //add to task collection
+        // Add a new document with a generated id
+        const newTaskRef = doc(collection(db, "tasks"));
+
+        // initialize task
+        await setDoc(newTaskRef, { labels: labels, task: task });
+
+        //add to taskList
+        await updateDoc(doc(db, "lists", "taskList"), {
+          tasks: arrayUnion(task),
         });
       } catch (e) {
         alert(e);
       }
     }
-  } else {
-    // task does not exist, create new task
-    try {
-      //add to task collection
-      await setDoc(ref, {
-        labels: labels,
-      });
-      //add to taskList
-      await updateDoc(doc(db, 'lists', 'taskList'), {
-        tasks: arrayUnion(task),
-      });
-    } catch (e) {
-      alert(e);
-    }
+  } catch (e) {
+    alert(e);
   }
 }
 
 export async function getUsersList() {
-  const docRef = doc(db, 'lists', 'userList');
+  const docRef = doc(db, "lists", "userList");
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    const data = docSnap.data()['users'];
+    const data = docSnap.data()["users"];
     return data;
   } else {
-    alert('userslist error!');
+    alert("userslist error!");
     return [];
   }
 }
 
 export async function getTasksList() {
-  const docRef = doc(db, 'lists', 'taskList');
+  const docRef = doc(db, "lists", "taskList");
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    const data = docSnap.data()['tasks'];
+    const data = docSnap.data()["tasks"];
     return data;
   } else {
-    alert('taskslist error!');
+    alert("taskslist error!");
     return [];
   }
 }
 
 export async function getGroupsList() {
-  const docRef = doc(db, 'lists', 'groupList');
+  const docRef = doc(db, "lists", "groupList");
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
-    const data = docSnap.data()['groups'];
+    const data = docSnap.data()["groups"];
     return data;
   } else {
-    alert('groupslist error!');
+    alert("groupslist error!");
     return [];
   }
 }
 
 export async function assignTaskToUser(assignToUser, assignTask) {
   try {
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('email', '==', assignToUser));
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "==", assignToUser));
 
     const querySnapshot = await getDocs(q);
 
@@ -95,7 +105,7 @@ export async function assignTaskToUser(assignToUser, assignTask) {
         currentTask: assignTask,
         // assignedTasks: arrayUnion(assignTask),
       });
-      alert('Successfully assigned task to user!');
+      alert("Successfully assigned task to user!");
     });
   } catch (e) {
     alert(e);
@@ -104,8 +114,8 @@ export async function assignTaskToUser(assignToUser, assignTask) {
 
 export async function assignTaskToGroup(assignToGroup, assignTask) {
   try {
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('groupID', '==', assignToGroup));
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("groupID", "==", assignToGroup));
 
     const querySnapshot = await getDocs(q);
 
@@ -114,7 +124,7 @@ export async function assignTaskToGroup(assignToGroup, assignTask) {
         currentTask: assignTask,
         // assignedTasks: arrayUnion(assignTask),
       });
-      alert('Successfully assigned task to group!');
+      alert("Successfully assigned task to group!");
     });
   } catch (e) {
     alert(e);
@@ -123,7 +133,7 @@ export async function assignTaskToGroup(assignToGroup, assignTask) {
 
 export async function getBugReports() {
   try {
-    const bugsRef = collection(db, 'bugs');
+    const bugsRef = collection(db, "bugs");
     const q = query(bugsRef);
     const querySnapshot = await getDocs(q);
 
@@ -141,8 +151,8 @@ export async function getBugReports() {
 
 export async function getUser(email) {
   try {
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, where('email', '==', email));
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "==", email));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs[0].data();
   } catch (e) {
