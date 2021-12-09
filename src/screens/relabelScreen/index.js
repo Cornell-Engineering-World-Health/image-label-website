@@ -27,7 +27,7 @@ export const RelabelScreen = () => {
     var imgSprite = new Image()
     imgSprite.src = currImage
     imgSprite.onload = function (e) {
-      context.drawImage(imgSprite, 0, 0, 750, 750);
+      context.drawImage(imgSprite, 94, 0, 562, 750);
     }
     changeCords([])
   }
@@ -48,7 +48,7 @@ export const RelabelScreen = () => {
     }
     changeImage(current.item.src)
     imgSprite.onload = function (e) {
-      context.drawImage(imgSprite, 0, 0, 750, 750);
+      context.drawImage(imgSprite, 94, 0, 562, 750);
     }
     changeCords([])
 
@@ -232,7 +232,7 @@ export const RelabelScreen = () => {
             var imgSprite = new Image()
             imgSprite.src = currImage
             imgSprite.onload = function (e) {
-              context.drawImage(imgSprite, 0, 0, 750, 750);
+              context.drawImage(imgSprite, 94, 0, 562, 750);
               context.beginPath();
               context.lineWidth = "6";
               context.strokeStyle = "red";
