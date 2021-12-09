@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import * as imageStorage from '../../firebase/imageStorage.js';
 import * as manage from '../../firebase/manage';
 import { Dropdown, Grid, Input, Label, Icon } from 'semantic-ui-react';
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
 
 const styles = {
   image: {
@@ -13,6 +15,7 @@ export const ConsoleScreen = () => {
   // [images] stores each image URL and its metadata.
   // Requires: an element in [images] has type {url: [string], metadata: [array object]}
   const [images, setImages] = useState([]);
+  const [imagesToDownload, setImagesToDownload] = useState([]);
   const [filterUsers, setFilterUser] = useState([]);
   const [filterTasks, setFilterTask] = useState([]);
   const [filtered, setFilter] = useState(false); // new filter applied
@@ -47,6 +50,7 @@ export const ConsoleScreen = () => {
     async function getAllImages() {
       const images = await imageStorage.downloadAllImages(time, true);
       setImages(images);
+      setImagesToDownload(await imageStorage.downloadAllImages(time, false));
     }
     if (noFilter) {
       getAllImages();
@@ -71,6 +75,9 @@ export const ConsoleScreen = () => {
             true
           ); // thumbnails
           setImages(taskImages);
+          setImagesToDownload(
+            await imageStorage.downloadImageByTasks(time, filterTasks, false)
+          );
         } else if (filterTasks.length === 0) {
           //only user
           var userImages = await imageStorage.downloadImageByUsers(
@@ -79,6 +86,9 @@ export const ConsoleScreen = () => {
             true
           ); // thumbnails
           setImages(userImages);
+          setImagesToDownload(
+            await imageStorage.downloadImageByUsers(time, filterUsers, false)
+          );
         } else {
           // both filter
           var images = await imageStorage.downloadImageByTasksAndUsers(
@@ -88,6 +98,14 @@ export const ConsoleScreen = () => {
             true
           ); // thumbnails
           setImages(images);
+          setImagesToDownload(
+            await imageStorage.downloadImageByTasksAndUsers(
+              time,
+              filterTasks,
+              filterUsers,
+              false
+            )
+          );
         }
       }
 
@@ -95,6 +113,24 @@ export const ConsoleScreen = () => {
       setFilter(false);
     }
   }, [filtered, filterUsers, filterTasks, time]);
+
+  const downloadZip = async () => {
+    var zip = new JSZip();
+    imagesToDownload.forEach(async (img, i) => {
+      const img_val = await fetch(img.url);
+      const image_blob = await img_val.blob();
+
+      var img_folder = zip.folder(img.path);
+      img_folder.file('image.jpeg', image_blob);
+      img_folder.file('metadata.txt', JSON.stringify(img.metadata));
+
+      if (i == images.length - 1) {
+        zip.generateAsync({ type: 'blob' }).then(function (content) {
+          FileSaver.saveAs(content, 'images.zip');
+        });
+      }
+    });
+  };
 
   // [handleGetImages] translates [images] into HTML elements
   const handleGetImages = (images) => {
@@ -321,7 +357,14 @@ export const ConsoleScreen = () => {
               </div>
             </section>
             <section>
-              <button title="Download">Download All</button>
+              <Label
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  downloadZip();
+                }}
+              >
+                Download All
+              </Label>
             </section>
 
             <section>

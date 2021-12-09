@@ -7,19 +7,26 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
-import { ref, getDownloadURL, getMetadata } from 'firebase/storage';
+import { ref, getDownloadURL } from 'firebase/storage';
 
-export async function downloadImage(imagePrefix) {
+function createMetadataObj(data) {
+  return {
+    date: data.date,
+    labels: data.labels,
+    task: data.task,
+  };
+}
+
+export async function downloadImage(imagePrefix, data) {
   const imageRef = ref(storage, imagePrefix);
   var rt = {};
 
   // GET [imagePrefix] URL
   const url = await getDownloadURL(imageRef);
-  const fullMetadata = await getMetadata(imageRef);
   rt = {
     path: imagePrefix,
     url: url,
-    metadata: fullMetadata.customMetadata,
+    metadata: createMetadataObj(data),
   };
   return rt;
 }
@@ -48,7 +55,7 @@ export async function downloadImageByTasks(time, tasks, thumbnail) {
         if (thumbnail) imagePath = imagePath.replace('images', 'thumbnails');
 
         // GET metadata of the image
-        return await downloadImage(imagePath);
+        return await downloadImage(imagePath, doc.data());
       } catch (e) {
         console.log(e);
       }
@@ -82,7 +89,7 @@ export async function downloadImageByUsers(time, users, thumbnail) {
       if (thumbnail) imagePath = imagePath.replace('images', 'thumbnails');
 
       // GET metadata of the image
-      return await downloadImage(imagePath);
+      return await downloadImage(imagePath, doc.data());
     });
 
     return await Promise.all(imageRequests);
@@ -123,7 +130,7 @@ export async function downloadImageByTasksAndUsers(
       if (tasks.includes(data.task)) {
         var imagePath = data.ref; // image/task/...
         if (thumbnail) imagePath = imagePath.replace('images', 'thumbnails');
-        return await downloadImage(imagePath);
+        return await downloadImage(imagePath, doc.data());
       }
     });
 
@@ -151,7 +158,7 @@ export async function downloadAllImages(time, thumbnail) {
     if (thumbnail) imagePath = imagePath.replace('images', 'thumbnails');
 
     // Return image objects
-    return await downloadImage(imagePath);
+    return await downloadImage(imagePath, doc.data());
   });
 
   // Return array of resolved promises (i.e. the image objects)
