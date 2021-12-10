@@ -6,8 +6,8 @@ const styles = {
   header: {
     color: 'black',
     backgroundColor: 'lightBlue',
-    width: '195px',
     marginBottom: '5px',
+    marginTop: '20px',
     marginRight: '5px',
   },
   email: {
@@ -15,7 +15,7 @@ const styles = {
     textAlign: 'left',
     marginBottom: '2px',
     marginRight: '5px',
-    marginTop: '2px',
+
     padding: '2px'
   },
   message: {
@@ -28,13 +28,15 @@ const styles = {
 };
 function BugReport({ email, message, time }) {
   return (
-    <div>
+    <body>
       <section class="index align-left">
-        <p style={styles.email}><Label style={styles.header}>Bug Report:   {email}</Label></p>
+        <p style={styles.email}><Label style={styles.header}>Bug Reported By:   {email}</Label></p>
+
         <p style={styles.message}>Message: {message}</p>
       </section>
+    </body>
 
-    </div >
+
   );
 }
 
